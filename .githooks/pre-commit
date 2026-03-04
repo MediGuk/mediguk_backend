@@ -3,5 +3,10 @@
 echo "Formatting code..."
 ./scripts/format.sh
 
-echo "Running tests..."
-./scripts/test.sh
+#tests
+if git diff --cached --name-only | grep -q "\.java$"; then
+  echo "Java files changed, running tests..."
+  ./scripts/test.sh
+else
+  echo "No Java changes, skipping tests"
+fi

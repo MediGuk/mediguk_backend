@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Formatting code..."
+./scripts/format.sh
+
+echo "Running tests..."
+./scripts/test.sh

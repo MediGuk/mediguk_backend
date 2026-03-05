@@ -3,6 +3,9 @@
 echo "Formatting code..."
 ./scripts/format.sh
 
+# add formated changes only in staged files
+git add $(git diff --name-only)
+
 #tests
 if git diff --cached --name-only | grep -q "\.java$"; then
   echo "Java files changed, running tests..."

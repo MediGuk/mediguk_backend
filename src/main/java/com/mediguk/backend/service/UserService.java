@@ -1,5 +1,6 @@
 package com.mediguk.backend.service;
 
+import com.mediguk.backend.dto.CreateUserDTO;
 import com.mediguk.backend.entity.User;
 import com.mediguk.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +17,13 @@ public class UserService {
     this.passwordEncoder = passwordEncoder;
   }
 
-  public User createUser(User user) {
+  public User createUser(CreateUserDTO dto) {
+
+    User user = new User();
+
+    user.setEmail(dto.getEmail());
+    user.setPassword(dto.getPassword());
+    user.setPhoneNumber(dto.getPhoneNumber());
 
     String hashedPassword = passwordEncoder.encode(user.getPassword());
 

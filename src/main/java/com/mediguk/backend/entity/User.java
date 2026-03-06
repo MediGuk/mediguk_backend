@@ -18,9 +18,11 @@ public class User {
 
   @Id @GeneratedValue private UUID id;
 
-  private String email;
+  private String documentNumber; // DNI, NIE , Passport
 
-  private String password;
+  private String fullName;
+
+  private String email;
 
   private String phoneNumber;
 }

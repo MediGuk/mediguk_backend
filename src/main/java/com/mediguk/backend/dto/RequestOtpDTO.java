@@ -1,17 +1,12 @@
 package com.mediguk.backend.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-@Data
-public class CreateUserDTO {
+@Data // getter & setter
+public class RequestOtpDTO {
 
   @NotBlank private String documentNumber;
 
   @NotBlank private String fullName;
-
-  @Email @NotBlank private String email;
-
-  private String phoneNumber;
 }

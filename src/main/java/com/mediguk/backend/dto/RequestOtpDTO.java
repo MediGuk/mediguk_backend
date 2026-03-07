@@ -7,6 +7,4 @@ import lombok.Data;
 public class RequestOtpDTO {
 
   @NotBlank private String documentNumber;
-
-  @NotBlank private String fullName;
 }

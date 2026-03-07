@@ -28,4 +28,15 @@ public class ValidationExceptionHandler {
 
     return errors;
   }
+
+  @ExceptionHandler(RuntimeException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public Map<String, String> handleRuntimeException(RuntimeException ex) {
+
+    Map<String, String> error = new HashMap<>();
+    error.put("error", ex.getMessage());
+
+    return error;
+  }
 }

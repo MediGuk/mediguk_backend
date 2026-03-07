@@ -1,6 +1,7 @@
 package com.mediguk.backend.controller;
 
 import com.mediguk.backend.dto.RequestOtpDTO;
+import com.mediguk.backend.dto.VerifyOtpDTO;
 import com.mediguk.backend.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,5 +18,10 @@ public class AuthController {
   @PostMapping("/request-otp")
   public void requestOtp(@RequestBody RequestOtpDTO dto) {
     authService.requestOtp(dto);
+  }
+
+  @PostMapping("/verify-otp")
+  public void verifyOtp(@RequestBody VerifyOtpDTO dto) {
+    authService.verifyOtp(dto);
   }
 }

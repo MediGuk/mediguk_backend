@@ -26,6 +26,8 @@ public class Otp {
 
   private LocalDateTime expiresAt;
 
+  private boolean used;
+
   // JOIN with user
   @ManyToOne
   @JoinColumn(name = "user_id")

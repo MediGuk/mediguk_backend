@@ -23,6 +23,9 @@ public class UserService {
     user.setEmail(dto.getEmail());
     user.setPhoneNumber(dto.getPhoneNumber());
 
-    return userRepository.save(user);
+    User savedUser = userRepository.save(user);
+    return savedUser;
+
+    // FUTURE: devuelve DTO !!!!!!
   }
 }

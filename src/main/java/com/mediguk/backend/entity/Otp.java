@@ -22,11 +22,17 @@ public class Otp {
   @Id @GeneratedValue // serial-primary key
   private UUID id;
 
-  private String code;
+  private String code; // hash
+
+  private LocalDateTime createdAt;
+
+  private LocalDateTime lastSentAt;
 
   private LocalDateTime expiresAt;
 
   private boolean used;
+
+  private int attempts;
 
   // JOIN with user
   @ManyToOne

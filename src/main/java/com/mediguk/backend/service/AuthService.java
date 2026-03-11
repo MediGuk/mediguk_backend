@@ -2,15 +2,20 @@ package com.mediguk.backend.service;
 
 import com.mediguk.backend.dto.RequestOtpDTO;
 import com.mediguk.backend.dto.VerifyOtpDTO;
+import com.mediguk.backend.entity.AuthSession;
 import com.mediguk.backend.entity.Otp;
+import com.mediguk.backend.model.AuthResult;
+import com.mediguk.backend.model.SessionCreationResult;
 import com.mediguk.backend.repository.OtpRepository;
 import com.mediguk.backend.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// @RequiredArgsConstructor to inject automatically ?? worth it ???
 @Service // Spring automatically: new AuthService(userRepositoryBean, otpRepositoryBean)  //
 // Dependency injection
 public class AuthService {
@@ -19,37 +24,48 @@ public class AuthService {
   private final UserRepository userRepository;
   private final OtpRepository otpRepository;
   private final PasswordEncoder passwordEncoder;
+  private final SessionService sessionService;
+  private final JwtService jwtService;
 
   public AuthService(
-      UserRepository userRepository, OtpRepository otpRepository, PasswordEncoder passwordEncoder) {
+      UserRepository userRepository,
+      OtpRepository otpRepository,
+      PasswordEncoder passwordEncoder,
+      SessionService sessionService,
+      JwtService jwtService) {
     this.userRepository = userRepository;
     this.otpRepository = otpRepository;
     this.passwordEncoder = passwordEncoder;
+    this.sessionService = sessionService;
+    this.jwtService = jwtService;
   }
 
-  @Transactional // method como un a sola operacion en DB (otro detras espera)
+  @Transactional // Method as only one operaton in DB (others wait behind)(protects against 2
+  // request at same time)
   public void requestOtp(RequestOtpDTO dto) {
 
     // 1. Extract data from the incoming request DTO
     String documentNumber = dto.getDocumentNumber();
 
-    // Tiempo fundamental
+    // Get actual time
     LocalDateTime now = LocalDateTime.now();
 
-    // 2. Find user in database by DNI/NIE
+    // 2. Find user in database by DNI/NIE (FUTURE: database of osakidetza)
     var user =
         userRepository
             .findByDocumentNumber(documentNumber)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // 2.1 Cheack last OTP of user
+    // 3 Cheack last OTP of user
     var lastOtp = otpRepository.findTopByUserOrderByExpiresAtDesc(user);
 
+    // 3.1 If OTP is present in user
     if (lastOtp.isPresent()) {
 
+      // get the otp
       Otp otp = lastOtp.get();
 
-      // if OTP valid and not used → reuse it
+      // if OTP not used & valid → reuse it
       if (!otp.isUsed() && otp.getExpiresAt().isAfter(now)) {
 
         System.out.println("Reusing existing OTP: " + otp.getCode());
@@ -66,23 +82,19 @@ public class AuthService {
       }
     }
 
-    // 3. If no last validated OTP, generate a secure OTP
-
-    // 3.1 Invalidate all before otps to used= true
+    // ***** 4. If NO last validated OTP, generate a secure OTP *****//
+    // 4.1 Invalidate all before otps to used= true
     otpRepository.invalidateOtpsForUser(user);
 
-    // 3.2 Generate secure OTP
+    // 4.2 Generate secure OTP
     // Math.random() is not safe for security-related operations /// 6-digit OTP using SecureRandom
     SecureRandom random = new SecureRandom();
     int otpCode = random.nextInt(900000) + 100000;
     System.out.println("OTP generated: " + otpCode);
 
-    // 3.1 Hash the OTP. FUTURE: hash with SHA
+    // 4.3 Hash the OTP. FUTURE: hash with SHA
     String otpPlain = String.valueOf(otpCode);
     String otpHashed = passwordEncoder.encode(otpPlain);
-
-    /// INVALID BEFORE TOKENS
-    /// otpRepository.invalidateOtpsForUser(user);
 
     // 4. Create a new OTP entity
     Otp otp = new Otp();
@@ -102,13 +114,13 @@ public class AuthService {
   }
 
   @Transactional
-  public void verifyOtp(VerifyOtpDTO dto) {
+  public AuthResult verifyOtp(
+      VerifyOtpDTO dto, HttpServletRequest request) { // ip, userAgent, deviceId
 
     // 1. Extract data from the incoming request DTO
     String documentNumber = dto.getDocumentNumber();
     String otpRequest = dto.getOtp();
 
-    // Tiempo fundamental
     LocalDateTime now = LocalDateTime.now();
 
     // 2. Find user in database by DNI/NIE
@@ -127,7 +139,6 @@ public class AuthService {
     String otpStored = otp.getCode();
 
     // 4.OTP securities
-
     // 4.0 Check if OTP is used // FUTURE: delete cos in query i do or need specific error for UX?
     if (otp.isUsed()) {
       throw new RuntimeException("OTP already used");
@@ -158,5 +169,16 @@ public class AuthService {
     otp.setUsed(true); // PERSISTENT-CONTEXT (no need of save)
     // otpRepository.save(otp);
 
+    // 6. Generate session: authSession, sessionToken, fingerprintHash
+    SessionCreationResult sessionResult = sessionService.createSession(user, request);
+
+    AuthSession session = sessionResult.session();
+    String fingerprint = sessionResult.fingerprint();
+
+    // 7. Generate token JWT
+    String accessToken = jwtService.generateToken(user.getId(), session.getSessionToken());
+
+    // 8. Return access token & fingerprint
+    return new AuthResult(accessToken, fingerprint);
   }
 }

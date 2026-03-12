@@ -173,13 +173,14 @@ public class AuthService {
     SessionCreationResult sessionResult = sessionService.createSession(user, request);
 
     AuthSession session = sessionResult.session();
-    String fingerprint = sessionResult.fingerprint();
+    String fingerprintRaw = sessionResult.fingerprint();
+    String refreshToken = session.getRefreshToken();
 
     // 7. Generate token JWT
-    String accessToken = jwtService.generateToken(user.getId(), session.getSessionToken());
+    String jwtToken = jwtService.generateToken(user.getId(), session.getSessionToken());
 
     // 8. Return access token(JWT) & fingerprint
-    return new AuthResult(accessToken, fingerprint);
+    return new AuthResult(jwtToken, refreshToken, fingerprintRaw);
   }
 
   @Transactional
@@ -191,5 +192,32 @@ public class AuthService {
     sessionService.revokeSession(sessionToken);
 
     System.out.println("Sesión revocada: " + sessionToken);
+  }
+
+  @Transactional
+  public AuthResult refresh(String oldRefreshToken, String fingerprintRaw) {
+    // 1. Validate token exist and no revoked
+    AuthSession session = sessionService.validateRefreshToken(oldRefreshToken);
+
+    // 2. Check if session not expired
+    if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
+      session.setRevoked(true);
+      throw new RuntimeException("Sesión expirada");
+    }
+
+    // 3. Validate cookie fingerprint
+    if (!passwordEncoder.matches(fingerprintRaw, session.getFingerprintHash())) {
+      session.setRevoked(true);
+      throw new RuntimeException("Seguridad: Huella no válida");
+    }
+
+    // 4. Rotate Refresh Token
+    String newRefreshToken = sessionService.rotateRefreshToken(session);
+
+    // 5. Generate new JWT (old one is expired)
+    String newJwt = jwtService.generateToken(session.getUser().getId(), session.getSessionToken());
+
+    // Return with new Jwt & refreshToken
+    return new AuthResult(newJwt, newRefreshToken, fingerprintRaw);
   }
 }

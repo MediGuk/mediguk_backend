@@ -28,7 +28,10 @@ public class AuthSession {
   private Long id;
 
   @Column(unique = true, nullable = false)
-  private String sessionToken;
+  private String sessionToken; // JWT has it in claims
+
+  @Column(unique = true, nullable = false)
+  private String refreshToken;
 
   @ManyToOne(optional = false)
   private User user;

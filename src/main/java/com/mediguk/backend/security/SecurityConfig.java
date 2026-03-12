@@ -52,11 +52,7 @@ public class SecurityConfig {
 
         // Define public endpoint (no need to be autenticated with JWT or fingerprint)
         .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers("/auth/**", "/otp/**")
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated())
+            auth -> auth.requestMatchers("/auth/**").permitAll().anyRequest().authenticated())
 
         // Authenticate de user with fileter before even springSecurity decides tu access or not
         .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

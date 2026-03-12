@@ -3,6 +3,7 @@ package com.mediguk.backend.controller;
 
 import com.mediguk.backend.dto.RequestOtpDTO;
 import com.mediguk.backend.dto.VerifyOtpDTO;
+import com.mediguk.backend.model.AuthResponse;
 import com.mediguk.backend.model.AuthResult;
 import com.mediguk.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +37,7 @@ public class AuthController {
     AuthResult result = authService.verifyOtp(dto, request);
 
     // 2. Get fingerprint from result
-    String fingerprint = result.fingerprint();
+    String fingerprint = result.fingerprintRaw();
 
     // 3. Create cookie of fingerprint
     ResponseCookie cookie =
@@ -52,7 +53,7 @@ public class AuthController {
     return ResponseEntity.ok()
         .header(
             HttpHeaders.SET_COOKIE, cookie.toString()) // navegator saves it automatically (cookie)
-        .body(Map.of("accessToken", result.accessToken()));
+        .body(Map.of("accessToken", result.jwtToken()));
   }
 
   @PostMapping("/logout")
@@ -73,5 +74,28 @@ public class AuthController {
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
         .body(Map.of("status", "Logged out successfully"));
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<AuthResponse> refresh(
+      @CookieValue(name = "refreshToken") String oldRefreshToken,
+      @CookieValue(name = "fingerprint") String fingerprintRaw) {
+    // 1. Refresh JWT & refreshtoken + rawFingerPrint
+    AuthResult result = authService.refresh(oldRefreshToken, fingerprintRaw);
+
+    // 2. Create response cookie
+    ResponseCookie newRefreshCookie =
+        ResponseCookie.from("refreshToken", result.refreshToken())
+            .httpOnly(true)
+            .secure(true)
+            .path("/auth/refresh")
+            .maxAge(60 * 60 * 24 * 30)
+            .sameSite("Strict")
+            .build();
+
+    // 3. Respond
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
+        .body(new AuthResponse(result.jwtToken()));
   }
 }

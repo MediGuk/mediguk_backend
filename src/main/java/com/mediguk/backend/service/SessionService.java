@@ -24,25 +24,28 @@ public class SessionService {
   public SessionCreationResult createSession(User user, HttpServletRequest request) {
 
     // FUNDAMENTAL
-    String fingerprint = generateFingerprint();
-    String fingerprintHash = passwordEncoder.encode(fingerprint);
+    String fingerprintRaw = generateFingerprint();
+    String fingerprintHash = passwordEncoder.encode(fingerprintRaw);
 
-    String sessionToken = UUID.randomUUID().toString();
+    String sessionToken = UUID.randomUUID().toString(); // inside JWT payload/Claims
+    String refreshToken = UUID.randomUUID().toString(); // by HTTP endpoint
 
     AuthSession session =
         AuthSession.builder()
             .user(user)
-            .sessionToken(sessionToken)
+            .sessionToken(sessionToken) // inside JWT of 1h
+            .refreshToken(
+                refreshToken) // rotative refresh cookie of 30 days but each time change of value
             .fingerprintHash(fingerprintHash)
             .deviceId(request.getHeader("X-Device-Id"))
             .ip(request.getRemoteAddr())
             .userAgent(request.getHeader("User-Agent"))
             .createdAt(LocalDateTime.now())
-            .expiresAt(LocalDateTime.now().plusDays(30))
+            .expiresAt(LocalDateTime.now().plusDays(30)) // session duration of 30 days
             .build();
 
     AuthSession savedSession = authSessionRepository.save(session);
-    return new SessionCreationResult(savedSession, fingerprint);
+    return new SessionCreationResult(savedSession, fingerprintRaw);
   }
 
   private String generateFingerprint() {
@@ -64,5 +67,21 @@ public class SessionService {
             session -> {
               session.setRevoked(true);
             });
+  }
+
+  // Search in AuthSession table a sesson with specific refreshToken & no revoked
+  @Transactional
+  public AuthSession validateRefreshToken(String refreshToken) {
+    return authSessionRepository
+        .findByRefreshTokenAndRevokedFalse(refreshToken)
+        .orElseThrow(() -> new RuntimeException("Refresh token no válido o sesión revocada"));
+  }
+
+  @Transactional
+  public String rotateRefreshToken(AuthSession session) {
+    String newRefreshToken = UUID.randomUUID().toString();
+    session.setRefreshToken(newRefreshToken);
+    authSessionRepository.save(session);
+    return newRefreshToken;
   }
 }

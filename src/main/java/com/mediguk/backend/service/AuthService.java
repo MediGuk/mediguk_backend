@@ -178,7 +178,7 @@ public class AuthService {
     // 7. Generate token JWT
     String accessToken = jwtService.generateToken(user.getId(), session.getSessionToken());
 
-    // 8. Return access token & fingerprint
+    // 8. Return access token(JWT) & fingerprint
     return new AuthResult(accessToken, fingerprint);
   }
 }

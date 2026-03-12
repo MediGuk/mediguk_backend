@@ -9,6 +9,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -86,6 +89,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    // 5. User object autenthicated with Sring Security
+    if (SecurityContextHolder.getContext().getAuthentication() == null) {
+      UsernamePasswordAuthenticationToken authentication =
+          new UsernamePasswordAuthenticationToken(
+              userId, // user authenticated
+              null, // credentials (password)
+              Collections.emptyList() // roles
+              );
+
+      // Saved authenticated user in SecurityContext
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    // 6. Pass the filter
     filterChain.doFilter(request, response);
   }
 }

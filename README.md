@@ -14,7 +14,9 @@ Versiones requeridas:
 1. Clona el repositorio.
 2. Crea el archivo de entorno:
    ```bash
-   cp .env.example .env
+   cp .env.dev .env
+   OR
+   cp .env.prod .env
    ```
 3. Ejecuta el script de configuración del proyecto:
    ```bash

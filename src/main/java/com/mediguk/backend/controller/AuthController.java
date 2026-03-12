@@ -8,6 +8,7 @@ import com.mediguk.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +50,28 @@ public class AuthController {
 
     // 4. Send HTPP responde
     return ResponseEntity.ok()
-        .header("Set-Cookie", cookie.toString()) // navegator saves it automatically (cookie)
+        .header(
+            HttpHeaders.SET_COOKIE, cookie.toString()) // navegator saves it automatically (cookie)
         .body(Map.of("accessToken", result.accessToken()));
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<Map<String, String>> logout(
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    String token = authHeader.substring(7);
+    authService.logout(token);
+
+    // Borramos la cookie de la cara del cliente
+    ResponseCookie deleteCookie =
+        ResponseCookie.from("fingerprint", "")
+            .maxAge(0) // Expired 0s ago, DELETE IT
+            .path("/")
+            .httpOnly(true)
+            .secure(true)
+            .build();
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+        .body(Map.of("status", "Logged out successfully"));
   }
 }

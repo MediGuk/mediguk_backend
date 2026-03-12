@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +45,6 @@ public class SessionService {
     return new SessionCreationResult(savedSession, fingerprint);
   }
 
-  // método privado para generar fingerprint
   private String generateFingerprint() {
 
     SecureRandom secureRandom = new SecureRandom();
@@ -54,5 +54,15 @@ public class SessionService {
     secureRandom.nextBytes(randomBytes);
 
     return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+  }
+
+  @Transactional
+  public void revokeSession(String sessionToken) {
+    authSessionRepository
+        .findBySessionTokenAndRevokedFalse(sessionToken)
+        .ifPresent(
+            session -> {
+              session.setRevoked(true);
+            });
   }
 }

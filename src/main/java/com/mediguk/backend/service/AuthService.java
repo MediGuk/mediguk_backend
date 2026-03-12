@@ -181,4 +181,15 @@ public class AuthService {
     // 8. Return access token(JWT) & fingerprint
     return new AuthResult(accessToken, fingerprint);
   }
+
+  @Transactional
+  public void logout(String accessToken) {
+    // 1. Take sessionToken from JWT
+    String sessionToken = jwtService.parseToken(accessToken).get("sessionToken", String.class);
+
+    // 2. Revoke session on DB to fail in filter
+    sessionService.revokeSession(sessionToken);
+
+    System.out.println("Sesión revocada: " + sessionToken);
+  }
 }

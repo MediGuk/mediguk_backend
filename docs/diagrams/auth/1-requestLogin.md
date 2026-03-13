@@ -8,40 +8,39 @@ sequenceDiagram
     participant C as Cliente (App/Web)
     participant API as AuthController
     participant S as AuthService
+    participant US as UserService
+    participant OS as OtpService
     participant R as OtpRepository
 
     Note over C, R: POST /auth/request-otp { documentNumber }
 
     C->>API: Enviar datos
-    API->>S: requestOtp(dto)
-    S->>R: findByDocumentNumber()
+    API->>S: requestLogin(dto)
+    S->>US: getUserByDocument(dni)
+    US->>R: findByDocumentNumber()
 
     alt ❌ Usuario NO existe
-        S-->>C: 404 Not Found
+        US-->>C: 404 User not found
     else ✅ Usuario Existe
-        S->>R: findTopByUserOrderByExpiresAtDesc()
+        S->>OS: requestOtp(user)
+        OS->>R: findTopByUserOrderByExpiresAtDesc()
         
         alt ⚠️ Rate Limit activo (< 60s)
-            Note right of S: lastSentAt + 60s > now
-            S-->>C: 429 Too Many Requests
+            Note right of OS: lastSentAt + 60s > now
+            OS-->>C: 429 Please wait X seconds
         
-        else 🔄 Reenviar OTP existente (> 60s)
-            S->>R: update lastSentAt = now
-            S-->>C: 200 OK (OTP reenviado)
-
-        else ✨ Generar Nuevo (Expirado o usado)
-            S->>R: invalidateOtpsForUser(user)
-            Note right of R: UPDATE used = true WHERE user_id = ?
+        else ✨ Generar Nuevo (Siempre crea uno limpio)
+            OS->>R: invalidateOtpsForUser(user)
             
             rect rgb(45, 45, 45)
-                Note over S: 🔒 Proceso de Seguridad
-                S->>S: code = SecureRandom (6 digits)
-                S->>S: hashedCode = passwordEncoder.encode(code)
+                Note over OS: 🔒 Proceso de Seguridad
+                OS->>OS: code = SecureRandom (4-6 digits)
+                OS->>OS: hashedCode = passwordEncoder.encode(code)
             end
 
-            S->>R: save(OtpEntity)
+            OS->>R: save(OtpEntity)
             Note right of R: code: hashedCode, expiresAt: +5m,<br/>attempts: 0, used: false
-            S-->>C: 200 OK (Nuevo OTP generado)
+            OS-->>C: 200 OK (OTP generado)
         end
     end
 

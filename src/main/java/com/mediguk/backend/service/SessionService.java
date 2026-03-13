@@ -71,7 +71,7 @@ public class SessionService {
 
   // Search in AuthSession table a sesson with specific refreshToken & no revoked
   @Transactional
-  public AuthSession validateRefreshToken(String refreshToken) {
+  public AuthSession getSessionByRefreshToken(String refreshToken) {
     return authSessionRepository
         .findByRefreshTokenAndRevokedFalse(refreshToken)
         .orElseThrow(() -> new RuntimeException("Refresh token no válido o sesión revocada"));
@@ -83,5 +83,29 @@ public class SessionService {
     session.setRefreshToken(newRefreshToken);
     authSessionRepository.save(session);
     return newRefreshToken;
+  }
+
+  @Transactional
+  public AuthSession getValidSession(String refreshToken, String fingerprintRaw) {
+
+    // 1. Find session by refreshToken & revoked=false
+    AuthSession session =
+        authSessionRepository
+            .findByRefreshTokenAndRevokedFalse(refreshToken)
+            .orElseThrow(() -> new RuntimeException("Refresh token no válido o sesión revocada"));
+
+    // 2. Validate session by expiration
+    if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
+      session.setRevoked(true); // Kill it if expired
+      throw new RuntimeException("Sesión expirada");
+    }
+
+    // 3. Validate session by rawFingerprint cookie
+    if (!passwordEncoder.matches(fingerprintRaw, session.getFingerprintHash())) {
+      session.setRevoked(true); // Kill it if fingerprint doesn't match
+      throw new RuntimeException("Seguridad: Huella no válida");
+    }
+
+    return session;
   }
 }

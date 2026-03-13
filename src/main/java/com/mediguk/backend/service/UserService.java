@@ -28,4 +28,10 @@ public class UserService {
 
     // FUTURE: devuelve DTO !!!!!! or Record
   }
+
+  public User getUserByDocument(String dni) {
+    return userRepository
+        .findByDocumentNumber(dni)
+        .orElseThrow(() -> new RuntimeException("User not found with DNI: " + dni));
+  }
 }

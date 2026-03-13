@@ -26,7 +26,7 @@ public class AuthController {
 
   @PostMapping("/request-otp")
   public void requestOtp(@RequestBody RequestOtpDTO dto) {
-    authService.requestOtp(dto);
+    authService.requestLogin(dto);
   }
 
   @PostMapping("/verify-otp")
@@ -34,7 +34,7 @@ public class AuthController {
       @RequestBody VerifyOtpDTO dto, HttpServletRequest request, HttpServletResponse response) {
 
     // 1. Verify OTP and get result
-    AuthResult result = authService.verifyOtp(dto, request);
+    AuthResult result = authService.verifyLogin(dto, request);
 
     // 2. Get fingerprint & refreshToken from result
     String fingerprint = result.fingerprintRaw();

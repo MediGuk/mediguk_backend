@@ -1,5 +1,6 @@
 package com.mediguk.backend.util;
 
+import com.mediguk.backend.entity.AuthSession;
 import com.mediguk.backend.entity.Otp;
 import com.mediguk.backend.entity.User;
 import java.time.LocalDateTime;
@@ -22,5 +23,16 @@ public class TestDataFactory {
     otp.setUsed(false);
     otp.setAttempts(0);
     return otp;
+  }
+
+  public static AuthSession createSession(User user, String refreshToken, String fingerprintHash) {
+    AuthSession session = new AuthSession();
+    session.setUser(user);
+    session.setRefreshToken(refreshToken);
+    session.setFingerprintHash(fingerprintHash);
+    session.setSessionToken(java.util.UUID.randomUUID().toString());
+    session.setExpiresAt(LocalDateTime.now().plusDays(30));
+    session.setRevoked(false);
+    return session;
   }
 }

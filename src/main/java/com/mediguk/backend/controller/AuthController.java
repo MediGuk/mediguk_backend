@@ -36,8 +36,9 @@ public class AuthController {
     // 1. Verify OTP and get result
     AuthResult result = authService.verifyOtp(dto, request);
 
-    // 2. Get fingerprint from result
+    // 2. Get fingerprint & refreshToken from result
     String fingerprint = result.fingerprintRaw();
+    String refreshToken = result.refreshToken();
 
     // 3. Create cookie of fingerprint
     ResponseCookie cookie =
@@ -49,11 +50,21 @@ public class AuthController {
             .sameSite("Strict") // (CSRF protection)
             .build();
 
-    // 4. Send HTPP responde
+    // 4. Create cookie of refreshToken
+    ResponseCookie refreshCookie =
+        ResponseCookie.from("refreshToken", refreshToken)
+            .httpOnly(true)
+            .secure(true)
+            .path("/") // Ojo: ponlo en "/" para que llegue al endpoint de refresh
+            .maxAge(60 * 60 * 24 * 30)
+            .sameSite("Strict")
+            .build();
+
+    // 5. Send HTPP responde
     return ResponseEntity.ok()
-        .header(
-            HttpHeaders.SET_COOKIE, cookie.toString()) // navegator saves it automatically (cookie)
-        .body(Map.of("accessToken", result.jwtToken()));
+        .header(HttpHeaders.SET_COOKIE, cookie.toString()) // navegator saves cookie automatically
+        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+        .body(Map.of("jwtToken", result.jwtToken()));
   }
 
   @PostMapping("/logout")

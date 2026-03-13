@@ -1,35 +1,43 @@
 ```mermaid
 graph TD
     %% Registro/Login Initial
-    A[Inicio: Usuario mete DNI] --> B{¿DNI válido?}
-    B -- SÍ --> C[Generar OTP + Hash en DB]
-    C --> D[Enviar SMS/Email al Usuario]
+    A[<b>Usuario mete DNI</b>] --> B{¿DNI valido?}
+    B -- OK --> C[Generar OTP + Guardar OTPHashed en DB]
+    C --> D[Enviar OTP via Whatsapp/SMS/Email]
     
-    %% Verificación
-    D --> E[Usuario mete OTP]
-    E --> F{¿OTP == Hash DB?}
-    F -- SÍ --> G[<b>LOGIN EXITOSO</b>]
+    %% Verificación y Entrega
+    D --> E[Usuario envía OTP]
+    E --> F{¿OTP Válido?}
+    F -- SÍ --> G[<b>AUTORIZAR SESIÓN</b>]
     
-    %% Entrega de Llaves
-    G --> H[Generar Session en DB]
-    H --> I[Entregar JWT al Body]
-    H --> J[Entregar Fingerprint + RefreshToken en Cookies]
+    %% Respuesta HTTP (Corregido y Unificado)
+    G --> H[Crear Registro 'AuthSession' en DB]
+    H --> IRESPONSE["Enviar a cliente
+    <b>HTTP 200 OK</b><br/>---
+    <b>Headers (Cookies):</b><br/>refreshToken & fingerprint <br/>---
+    <b>Body (JSON):</b><br/>JWT (sessionID + userId)"]
     
     %% Uso Diario
-    I --> K[Peticiones API con JWT]
-    K --> L{¿JWT expirado?}
+    IRESPONSE --> K[Client: Peticiones API
+    Headers:
+    <b>JWT</b> & <b>FingerPrintCookie</b>]
+    K --> L{¿JWT Válido?}
     
-    %% Ciclo de Vida
-    L -- NO --> K
-    L -- SÍ --> M[Llamada automática a /REFRESH]
+    %% Control de Seguridad
+    L -- SÍ --> M[Interceptor: 
+    FingerprintCookie correcto?]
+    M -- SÍ --> N[Procesar Petición OK]
+    M -- NO --> P[<b>Alerta:</b> </br>Cerrar Sesión]
     
     %% Renovación
-    M --> N{¿RefreshToken y Fingerprint OK?}
-    N -- SÍ --> O[Rotar RefreshToken + Nuevo JWT]
-    O --> K
-    N -- NO --> P[Sesión Cerrada: Volver a inicio]
+    L -- EXPIRADO --> Q[ <b>/refresh</b> route </br>RefreshCookie + FingerPrintCookie]
+    Q --> R{¿Cookies refreshToken + Fingerprint válidas en DB?}
+    R -- SÍ --> S[Rotar Tokens con nuevos: JWT + RefreshToken]
+    S --> K
+    R -- NO --> P
 
-    %% Estilos
-    style G fill:#2d5,stroke:#333,stroke-width:2px
-    style J fill:#f96,stroke:#333,dash
-    style O fill:#3498db,stroke:#fff
+    %% Estilos limpios
+    style G fill:#00c853,stroke:#000,color:#fff
+    style IRESPONSE fill:#e3f2fd,stroke:#2196f3,stroke-width:2px,color:#000,text-align:center
+    style P fill:#f44336,stroke:#000,color:#fff
+    style N fill:#b9f6ca,stroke:#00c853,color:#000

@@ -7,6 +7,7 @@ Service backend de la plataforma Mediguk desarrollado con Spring Boot.
 Versiones requeridas:
 - Java 21 (verificar con `java -version` y `javac -version`)
 - SpringBoot 4.0.3
+   migration help: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#starters
 - PostgreSQL
 
 ## Configuración
@@ -33,6 +34,8 @@ Versiones requeridas:
    ./scripts/test.sh
    ```
 
+## Problemas
+ 1. Dependencias y cache: CTRL + shift + P -> Java: Clean Java Language Server Workspace
 ---
 
 ## Documentación Técnica

@@ -24,7 +24,7 @@ public class SecurityConfig {
   private final AuthSessionRepository authSessionRepository;
   private final PasswordEncoder passwordEncoder;
 
-  @Value("${app.cors.allowed-origin}")
+  @Value("${app.security.cors.allowed-origin}")
   private String allowedOrigin;
 
   public SecurityConfig(

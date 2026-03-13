@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
-  @Value("${jwt.secret}")
+  @Value("${app.security.jwt.secret-key}")
   private String jwtSecret;
 
   public String generateToken(UUID userId, String sessionToken) {

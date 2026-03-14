@@ -1,15 +1,14 @@
 package com.mediguk.backend.controller;
 
-import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.mediguk.backend.entity.AuthSession;
-import com.mediguk.backend.entity.Otp;
-import com.mediguk.backend.entity.User;
-import com.mediguk.backend.repository.AuthSessionRepository;
-import com.mediguk.backend.repository.OtpRepository;
-import com.mediguk.backend.repository.UserRepository;
+import com.mediguk.backend.auth.entity.AuthSession;
+import com.mediguk.backend.auth.entity.Otp;
+import com.mediguk.backend.auth.entity.User;
+import com.mediguk.backend.auth.repository.AuthSessionRepository;
+import com.mediguk.backend.auth.repository.OtpRepository;
+import com.mediguk.backend.auth.repository.UserRepository;
 import com.mediguk.backend.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

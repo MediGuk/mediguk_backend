@@ -1,8 +1,8 @@
 package com.mediguk.backend.util;
 
-import com.mediguk.backend.entity.AuthSession;
-import com.mediguk.backend.entity.Otp;
-import com.mediguk.backend.entity.User;
+import com.mediguk.backend.auth.entity.AuthSession;
+import com.mediguk.backend.auth.entity.Otp;
+import com.mediguk.backend.auth.entity.User;
 import java.time.LocalDateTime;
 
 public class TestDataFactory {

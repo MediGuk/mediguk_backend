@@ -31,7 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
       "spring.jpa.hibernate.ddl-auto=create-drop",
       // valor cualquiera para el test de los .env
       "JWT_SECRET=estaesunaclavesecretadePruebas12345678901234567890",
-      "FRONTEND_URL=http://localhost:3000"
+      "FRONTEND_URL=http://localhost:3000",
+      "GEMINI_API_KEY=tu-key-api-key"
     })
 @AutoConfigureMockMvc
 @ActiveProfiles("test") // Importante: Lee application-test.properties con H2

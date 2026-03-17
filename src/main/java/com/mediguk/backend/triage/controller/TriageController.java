@@ -1,6 +1,8 @@
 package com.mediguk.backend.triage.controller;
 
 import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.response.DemoStageOneResponse;
+import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.service.TriageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,8 @@ public class TriageController {
    * EL PUNTO DE ENTRADA (STAGE 1): Aquí es donde Go nos manda el ID, el PatientId y el RawInput.
    */
   @PostMapping("/process")
-  public ResponseEntity<String> processTriage(@Valid @RequestBody TriageRequestFromClient request) {
+  public ResponseEntity<DemoStageOneResponse> processTriage(
+      @Valid @RequestBody TriageRequestFromClient request) {
     log.info("--- NUEVO CASO RECIBIDO DESDE GO ---");
     log.info(
         "ID Caso: {} | Paciente: {} | Categoría Sugerida: {}",
@@ -29,10 +32,20 @@ public class TriageController {
         request.suggestedCategory());
 
     // Disparamos el motor de Triage (Stage 1: IA Especialista)
-    triageService.processTriage(request);
+    TriageCase entityProcesada = triageService.processTriage(request);
 
-    log.info("--- STAGE 1 COMPLETADO CON ÉXITO PARA EL CASO: {} ---", request.id());
+    // Creamos la respuesta para la Demo
+    DemoStageOneResponse response =
+        new DemoStageOneResponse(
+            entityProcesada.getId(),
+            entityProcesada.getPatientId(),
+            entityProcesada.getCategory(),
+            entityProcesada.getStatus(),
+            entityProcesada.getMedicalData() // Aquí va tu DermatologyDetails dentro del Map
+            );
 
-    return ResponseEntity.ok("Stage 1 procesado y guardado en la mochila JSONB.");
+    log.info("--- STAGE 1 COMPLETADO CON ÉXITO PARA EL CASO: {} ---", request.id(), response);
+
+    return ResponseEntity.ok(response);
   }
 }

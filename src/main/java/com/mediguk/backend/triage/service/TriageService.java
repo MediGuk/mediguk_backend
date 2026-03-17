@@ -108,7 +108,7 @@ public class TriageService {
   @Autowired private TriageStrategyFactory factory;
 
   @Transactional
-  public void processTriage(TriageRequestFromClient request) {
+  public TriageCase processTriage(TriageRequestFromClient request) {
     // 1. OBTENER O CREAR EL CASO
     // 1. Buscamos si el ID ya existe en nuestra DB
     Optional<TriageCase> existingCase = repository.findById(request.id());
@@ -160,7 +160,8 @@ public class TriageService {
 
     // 4. GUARDADO FINAL DEL STAGE 1 (Sello de éxito)
     entity.setStatus(TriageStatus.ST1_SPECIALIST_ACCEPTED);
-    repository.saveAndFlush(entity); // Aseguras que el Stage 1 se cierra y se escribe ya.
+    // RETURN para la demo
+    return repository.saveAndFlush(entity); // Aseguras que el Stage 1 se cierra y se escribe ya.
 
     // FACADE se utilzias para hacer como metodos helper para el service y asi no tenemos 2000
     // lineas de codigo

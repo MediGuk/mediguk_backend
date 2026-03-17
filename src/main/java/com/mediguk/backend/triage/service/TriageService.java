@@ -150,8 +150,9 @@ public class TriageService {
           e.getOldCategory(),
           e.getNewCategory());
 
-      // Opcional: podrías guardar el estado de REJECTED aquí si hicieras flush
+      // Opcional: podrías guardar el estado de REJECTED aquí antes de flush
       entity.setStatus(TriageStatus.REJECTED_BY_SPECIALIST);
+      repository.saveAndFlush(entity); // <--- AQUÍ: Guardas el rastro del fallo antes de reintentar
 
       // Reintento con el nuevo médico
       executeStage1WithStrategy(entity, request, e.getNewCategory());
@@ -159,7 +160,7 @@ public class TriageService {
 
     // 4. GUARDADO FINAL DEL STAGE 1 (Sello de éxito)
     entity.setStatus(TriageStatus.ST1_SPECIALIST_ACCEPTED);
-    repository.save(entity);
+    repository.saveAndFlush(entity); // Aseguras que el Stage 1 se cierra y se escribe ya.
 
     // FACADE se utilzias para hacer como metodos helper para el service y asi no tenemos 2000
     // lineas de codigo

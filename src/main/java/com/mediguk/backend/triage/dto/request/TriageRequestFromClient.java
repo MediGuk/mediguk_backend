@@ -10,7 +10,12 @@ public record TriageRequestFromClient(
     String rawInput, // Lo que salió de Whisper + Llama
     String imageUrl, // La URL de S3 que mandó Go // optional
     Map<String, Object> extraData // <-- ¡LA CLAVE! Aquí viene el "anatomSite", "fever", etc.
-    ) {}
+    ) {
+        // TIP: Puedes añadir un método de conveniencia dentro del Record
+        public boolean hasImage() {
+            return imageUrl != null && !imageUrl.isBlank();
+        }
+    }
 
 //******************************************************** */
 

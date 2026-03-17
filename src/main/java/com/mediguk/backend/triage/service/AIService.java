@@ -22,6 +22,15 @@ public class AIService {
   public StageOneResult callVLM(String imageUrl, String expertPrompt) {
     log.info("Invocando a la IA con prompt experto...");
 
+    // Verificamos si tenemos "ojos" (imagen) con texto o solo "oído" (texto)
+    if (imageUrl != null && !imageUrl.isBlank()) {
+      log.info("--- MODO MULTIMODAL ACTIVO (Gemini) ---");
+      // Aquí la lógica de Gemini para adjuntar la URL
+    } else {
+      log.info("--- MODO TEXTO PURO (Llama/Grok) ---");
+      // Aquí la lógica para enviar solo el prompt
+    }
+
     try {
       // 1. SIMULACIÓN DE LLAMADA API (Aquí iría tu FeignClient o WebClient a Gemini/GPT)
       // Imagina que la IA nos devuelve el JSON que pactamos:

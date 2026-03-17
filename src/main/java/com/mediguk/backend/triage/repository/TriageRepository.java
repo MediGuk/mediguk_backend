@@ -7,5 +7,5 @@ import java.util.UUID;
 
 @Repository
 public interface TriageRepository extends JpaRepository<TriageCase, UUID> {
-    // Aquí ya tenemos save(), findById(), etc. ¡Dignidad Lógica!
+    // Automaticamente tiene save(), findById()..
 }

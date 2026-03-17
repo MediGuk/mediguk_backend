@@ -10,5 +10,6 @@ chmod +x scripts/*
 
 echo "Installing Maven dependencies..."
 ./mvnw clean install
+#./mvnw clean install -U -DskipTests   TO AVOID TESTS
 
 echo "Setup complete"

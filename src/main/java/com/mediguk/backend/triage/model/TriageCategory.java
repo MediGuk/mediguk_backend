@@ -5,7 +5,10 @@ public enum TriageCategory {
     DERMATOLOGIA,
     RESPIRATORIO,
     MUSCULO_ESQUELETICO,
+    INFECCION,
     GENERAL;
+
+    //ADMINISTRATIVO (future)
 
     // Método de seguridad para convertir String a Enum sin que explote
     public static TriageCategory fromString(String category) {

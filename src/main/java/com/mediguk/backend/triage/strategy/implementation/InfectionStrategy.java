@@ -1,20 +1,22 @@
 package com.mediguk.backend.triage.strategy.implementation;
 
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.entity.TriageStatus;
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
-import com.mediguk.backend.triage.model.StageOneResult;
-import com.mediguk.backend.triage.model.specialty.InfectionDetails;
-import com.mediguk.backend.triage.strategy.TriageStrategy;
-import com.mediguk.backend.triage.util.RecordInspector;
-import com.mediguk.backend.triage.service.AIService;
 import com.mediguk.backend.triage.exception.CategoryMismatchException;
 import com.mediguk.backend.triage.exception.MedicalDataIncompleteException;
+import com.mediguk.backend.triage.model.StageOneResult;
+import com.mediguk.backend.triage.model.specialty.InfectionDetails;
+import com.mediguk.backend.triage.service.AIService;
+import com.mediguk.backend.triage.strategy.TriageStrategy;
+import com.mediguk.backend.triage.util.RecordInspector;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -39,7 +41,8 @@ public class InfectionStrategy implements TriageStrategy {
         String prompt = String.format(
             "Eres Infectólogo. Analiza: '%s'. " +
             "Devuelve un JSON con estos campos obligatorios: %s " +
-            "Y dentro del objeto 'details', estos campos específicos: %s",
+            "Y dentro del objeto 'specialtyDetails', estos campos específicos: %s" +
+            "IMPORTANTE: Para los campos booleanos  usa exclusivamente los valores JSON true o false. No añadas texto descriptivo.",
             request.rawInput(), commonFields, specificFields
         );
 
@@ -51,7 +54,7 @@ public class InfectionStrategy implements TriageStrategy {
 
         try {
             InfectionDetails details = mapper.convertValue(
-                aiResult.rawMedicalData(), 
+                aiResult.specialtyDetails(), 
                 InfectionDetails.class
             );
             entity.getMedicalData().put("specialtyDetails", details);

@@ -69,6 +69,9 @@ public class AIService {
               .retrieve()
               .body(String.class);
 
+      log.info("--- [DEBUG] RESPUESTA BRUTA DE GOOGLE ---");
+      log.info(rawResponse);
+
       // 3. EL PARSEO: Entramos en el árbol de Google (candidates[0].content.parts[0].text)
       JsonNode root = mapper.readTree(rawResponse);
       String aiText =
@@ -82,6 +85,8 @@ public class AIService {
               .trim();
 
       log.info("JSON limpio recibido de la IA");
+      log.info("--- [DEBUG] JSON LIMPIO QUE VAMOS A PARSEAR ---");
+      log.info(cleanJson);
 
       // 2. PARSEO AL CONTENEDOR (StageOneAIResult)
       // Gracias al @JsonProperty que pusimos, Jackson lo mapea solo.

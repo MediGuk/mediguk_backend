@@ -36,14 +36,16 @@ public class GeneralStrategy implements TriageStrategy {
         String.format(
             "Eres Médico de Medicina General. Analiza: '%s'. "
                 + "Devuelve un JSON con estos campos obligatorios: %s "
-                + "Y dentro del objeto 'details', estos campos específicos: %s",
+                + "Y dentro del objeto 'specialtyDetails', estos campos específicos: %s"
+                + "IMPORTANTE: Para los campos booleanos  usa exclusivamente los valores JSON true o false. No añadas texto descriptivo.",
             request.rawInput(), commonFields, specificFields);
 
     StageOneResult aiResult = aiService.callVLM(request.imageUrl(), prompt);
 
     // En General no solemos lanzar CategoryMismatchException porque es el fallback.
     try {
-      GeneralDetails details = mapper.convertValue(aiResult.rawMedicalData(), GeneralDetails.class);
+      GeneralDetails details =
+          mapper.convertValue(aiResult.specialtyDetails(), GeneralDetails.class);
       entity.getMedicalData().put("specialtyDetails", details);
       entity.setStatus(TriageStatus.ST1_SPECIALIST_ACCEPTED);
     } catch (Exception e) {

@@ -58,7 +58,8 @@ public class DermatologyStrategy implements TriageStrategy {
         String prompt = String.format(
             "Eres Dermatólogo. Analiza: '%s'. " +
             "Devuelve un JSON con estos campos obligatorios: %s " +
-            "Y dentro del objeto 'details', estos campos específicos: %s",
+            "Y dentro del objeto 'specialtyDetails', estos campos específicos: %s" +
+            "IMPORTANTE: Para los campos booleanos  usa exclusivamente los valores JSON true o false. No añadas texto descriptivo.",
             request.rawInput(), commonFields, dermaFields
         );
 
@@ -79,7 +80,7 @@ public class DermatologyStrategy implements TriageStrategy {
         try {
             // Sacamos el mapa 'details' y lo convertimos al Record de un golpe
             DermatologyDetails details = mapper.convertValue(
-                aiResult.rawMedicalData(), 
+                aiResult.specialtyDetails(), 
                 DermatologyDetails.class
             );
 

@@ -39,7 +39,8 @@ public class MusculoSkeletalStrategy implements TriageStrategy {
         String prompt = String.format(
             "Eres Traumatólogo. Analiza: '%s'. " +
             "Devuelve un JSON con estos campos obligatorios: %s " +
-            "Y dentro del objeto 'details', estos campos específicos: %s",
+            "Y dentro del objeto 'specialtyDetails', estos campos específicos: %s" +
+            "IMPORTANTE: Para los campos booleanos  usa exclusivamente los valores JSON true o false. No añadas texto descriptivo.",
             request.rawInput(), commonFields, specificFields
         );
 
@@ -51,7 +52,7 @@ public class MusculoSkeletalStrategy implements TriageStrategy {
 
         try {
             MusculoSkeletalDetails details = mapper.convertValue(
-                aiResult.rawMedicalData(), 
+                aiResult.specialtyDetails(), 
                 MusculoSkeletalDetails.class
             );
             entity.getMedicalData().put("specialtyDetails", details);

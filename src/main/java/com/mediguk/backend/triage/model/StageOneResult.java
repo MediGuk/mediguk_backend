@@ -21,17 +21,17 @@ public record StageOneResult(
     // private String cleanedPatientInput;  
 
     // 3. MOCHILA MEDICA (El mapa que contiene el SPECIALTYDETAILS record)
-    @JsonProperty("details")
-    Map<String, Object> rawMedicalData  
+    @JsonProperty("specialtyDetails")
+    Map<String, Object> specialtyDetails 
 ) {
     
     @SuppressWarnings("unchecked")
     public <T> T getDetail(String key) {
-        return (T) rawMedicalData.get(key);
+        return (T) specialtyDetails.get(key);
     }
 
     public boolean getBool(String key) {
-        return Boolean.TRUE.equals(rawMedicalData.get(key));
+        return Boolean.TRUE.equals(specialtyDetails.get(key));
     }
 }
 

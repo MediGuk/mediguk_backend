@@ -19,6 +19,16 @@ public record TriageRequestFromClient(
 
 //******************************************************** */
 
+// {
+//   "id": "a1b2c3d4-e5f6-7777-8888-9999aabbccdd",
+//   "patientId": "PAC-001",
+//   "suggestedCategory": "DERMATOLOGIA",
+//   "rawInput": "Tengo una mancha roja en el antebrazo desde hace tres días. Pica mucho.",
+//   "imageUrl": null
+// }
+
+//******************************************************** */
+
 // Llega el Request.
 
 // Go recoge la voz y lo convierte en texto ordenado y partes importantes con ultra rapida con Whisper + LLama.

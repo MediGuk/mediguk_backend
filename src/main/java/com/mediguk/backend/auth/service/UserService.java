@@ -1,6 +1,6 @@
 package com.mediguk.backend.auth.service;
 
-import com.mediguk.backend.auth.dto.CreateUserDTO;
+import com.mediguk.backend.auth.dto.request.CreateUserDTO;
 import com.mediguk.backend.auth.entity.User;
 import com.mediguk.backend.auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -18,10 +18,10 @@ public class UserService {
 
     User user = new User();
 
-    user.setDocumentNumber(dto.getDocumentNumber());
-    user.setFullName(dto.getFullName());
-    user.setEmail(dto.getEmail());
-    user.setPhoneNumber(dto.getPhoneNumber());
+    user.setDocumentNumber(dto.documentNumber());
+    user.setFullName(dto.fullName());
+    user.setEmail(dto.email());
+    user.setPhoneNumber(dto.phoneNumber());
 
     User savedUser = userRepository.save(user);
     return savedUser;

@@ -32,7 +32,7 @@ graph TD
     %% Renovación
     L -- EXPIRADO --> Q[ <b>/refresh</b> route </br>RefreshCookie + FingerPrintCookie]
     Q --> R{¿Cookies refreshToken + Fingerprint válidas en DB?}
-    R -- SÍ --> S[Rotar Tokens con nuevos: JWT + RefreshToken]
+    R -- SÍ --> S[Rotar TOKENS 'value' con nuevos: JWT + RefreshToken + fingerprint]
     S --> K
     R -- NO --> P
 

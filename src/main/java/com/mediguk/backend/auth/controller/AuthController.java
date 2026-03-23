@@ -1,14 +1,20 @@
 // CONTROLLER HTTP RELATED ONES ALWAYS HERE
 package com.mediguk.backend.auth.controller;
 
-import com.mediguk.backend.auth.dto.RequestOtpDTO;
-import com.mediguk.backend.auth.dto.VerifyOtpDTO;
-import com.mediguk.backend.auth.model.AuthResponse;
+import com.mediguk.backend.auth.dto.request.RequestOtpDTO;
+import com.mediguk.backend.auth.dto.request.VerifyOtpDTO;
+import com.mediguk.backend.auth.dto.response.AuthResponse;
 import com.mediguk.backend.auth.model.AuthResult;
 import com.mediguk.backend.auth.service.AuthService;
+import com.mediguk.backend.auth.service.JwtService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +22,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Autenticación", description = "Endpoints para el manejo de OTP y sesiones")
 public class AuthController {
+
+  @Autowired
+  private JwtService jwtService;
 
   private final AuthService authService;
 
-  public AuthController(AuthService authService) {
+  public AuthController(AuthService authService, Long jwtExpiration) {
     this.authService = authService;
   }
 
@@ -30,7 +40,8 @@ public class AuthController {
   }
 
   @PostMapping("/verify-otp")
-  public ResponseEntity<Map<String, String>> verifyOtp(
+  @Operation(summary = "Verificar código OTP", description = "Valida el código enviado al celular/correo del usuario")
+  public ResponseEntity<AuthResponse> verifyOtp(
       @RequestBody VerifyOtpDTO dto, HttpServletRequest request, HttpServletResponse response) {
 
     // 1. Verify OTP and get result
@@ -64,7 +75,7 @@ public class AuthController {
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, cookie.toString()) // navegator saves cookie automatically
         .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-        .body(Map.of("jwtToken", result.jwtToken()));
+        .body(new AuthResponse (result.jwtToken(), jwtService.getExpirationTime()));
   }
 
   @PostMapping("/logout")
@@ -107,6 +118,6 @@ public class AuthController {
     // 3. Respond
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
-        .body(new AuthResponse(result.jwtToken()));
+        .body(new AuthResponse(result.jwtToken(), jwtService.getExpirationTime()));
   }
 }

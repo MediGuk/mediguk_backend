@@ -1,7 +1,7 @@
 package com.mediguk.backend.triage.strategy.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.request.TriageRequest;
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.entity.TriageStatus;
 import com.mediguk.backend.triage.exception.MedicalDataIncompleteException;
@@ -28,7 +28,7 @@ public class GeneralStrategy implements TriageStrategy {
   }
 
   @Override
-  public void conductStage1(TriageCase entity, TriageRequestFromClient request) {
+  public void conductStage1(TriageCase entity, TriageRequest request) {
     List<String> commonFields = RecordInspector.getFields(StageOneResult.class);
     List<String> specificFields = RecordInspector.getFields(GeneralDetails.class);
 

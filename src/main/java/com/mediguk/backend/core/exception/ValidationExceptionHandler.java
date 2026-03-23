@@ -12,31 +12,38 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class ValidationExceptionHandler {
 
+  // Captura los fallos de @Valid en tus DTOs (400 Bad Request)
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public Map<String, String> handleValidationException(MethodArgumentNotValidException ex) {
-
     Map<String, String> errors = new HashMap<>();
-
     ex.getBindingResult()
         .getFieldErrors()
         .forEach(
             error -> {
               errors.put(error.getField(), error.getDefaultMessage());
             });
-
     return errors;
   }
 
+  // Para errores específicos de "No encontrado" (404)
+  // Deberías crear tu propia excepción: EntityNotFoundException
+  @ExceptionHandler(jakarta.persistence.EntityNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public Map<String, String> handleNotFound(Exception ex) {
+      return Map.of("error", ex.getMessage());
+  }
+
+  // Para errores genéricos del servidor (500)
+  // Es mejor no devolver el mensaje real de la excepción en producción por seguridad
   @ExceptionHandler(RuntimeException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
   public Map<String, String> handleRuntimeException(RuntimeException ex) {
-
     Map<String, String> error = new HashMap<>();
     error.put("error", ex.getMessage());
-
     return error;
   }
 }

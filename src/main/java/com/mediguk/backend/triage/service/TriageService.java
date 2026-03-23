@@ -85,7 +85,7 @@ package com.mediguk.backend.triage.service;
 
 // https://www.isic-archive.com/
 
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.request.TriageRequest;
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.entity.TriageStatus;
 import com.mediguk.backend.triage.exception.CategoryMismatchException;
@@ -108,7 +108,7 @@ public class TriageService {
   @Autowired private TriageStrategyFactory factory;
 
   @Transactional
-  public TriageCase processTriage(TriageRequestFromClient request) {
+  public TriageCase processTriage(TriageRequest request) {
     // 1. OBTENER O CREAR EL CASO
     // 1. Buscamos si el ID ya existe en nuestra DB
     Optional<TriageCase> existingCase = repository.findById(request.id());
@@ -170,7 +170,7 @@ public class TriageService {
   }
 
   private void executeStage1WithStrategy(
-      TriageCase entity, TriageRequestFromClient request, String category) {
+      TriageCase entity, TriageRequest request, String category) {
     entity.setCategory(category);
     TriageStrategy strategy = factory.getStrategy(category);
 

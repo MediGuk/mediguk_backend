@@ -24,8 +24,14 @@ public class SecurityConfig {
   private final AuthSessionRepository authSessionRepository;
   private final PasswordEncoder passwordEncoder;
 
+  @Value("${spring.profiles.active:dev}")
+  private String activeProfile;
+
   @Value("${app.security.cors.allowed-origin}")
   private String allowedOrigin;
+
+  @Value("${mediguk.jwt.expiration}")
+  private long jwtExpiration;
 
   public SecurityConfig(
       JwtService jwtService,
@@ -51,11 +57,20 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
         // Define public endpoint (no need to be autenticated with JWT or fingerprint)
-        .authorizeHttpRequests(
-            auth -> auth
-            .requestMatchers("/auth/**").permitAll()
+        .authorizeHttpRequests(auth -> {
+            if ("dev".equals(activeProfile)) {
+                auth.requestMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
+                ).permitAll();
+            }
+            
+            auth.requestMatchers("/auth/**").permitAll();
             // .requestMatchers("/api/triage/**").permitAll() // Para probar DEMO POSTMAN
-            .anyRequest().authenticated())
+            
+            auth.anyRequest().authenticated();
+        })
 
         // Authenticate de user with fileter before even springSecurity decides tu access or not
         .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -83,5 +98,11 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/**", config); // apply this rules to all the API
 
     return source;
+  }
+
+  // JWT expiration for auth
+  @Bean
+  public Long jwtExpiration() {
+    return jwtExpiration;
   }
 }

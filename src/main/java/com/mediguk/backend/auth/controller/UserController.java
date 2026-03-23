@@ -1,6 +1,6 @@
 package com.mediguk.backend.auth.controller;
 
-import com.mediguk.backend.auth.dto.CreateUserDTO;
+import com.mediguk.backend.auth.dto.request.CreateUserDTO;
 import com.mediguk.backend.auth.entity.User;
 import com.mediguk.backend.auth.service.UserService;
 import jakarta.validation.Valid;

@@ -3,7 +3,7 @@ package com.mediguk.backend.triage.dto.request;
 import java.util.Map;
 import java.util.UUID;
 
-public record TriageRequestFromClient(
+public record TriageRequest(
     UUID id,
     String patientId,
     String suggestedCategory, // "DERMATOLOGIA", "RESPIRATORIO", etc. // Lo pone el cliente 

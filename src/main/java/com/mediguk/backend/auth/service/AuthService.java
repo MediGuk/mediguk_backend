@@ -1,7 +1,7 @@
 package com.mediguk.backend.auth.service;
 
-import com.mediguk.backend.auth.dto.RequestOtpDTO;
-import com.mediguk.backend.auth.dto.VerifyOtpDTO;
+import com.mediguk.backend.auth.dto.request.RequestOtpDTO;
+import com.mediguk.backend.auth.dto.request.VerifyOtpDTO;
 import com.mediguk.backend.auth.entity.AuthSession;
 import com.mediguk.backend.auth.entity.User;
 import com.mediguk.backend.auth.model.AuthResult;
@@ -26,7 +26,7 @@ public class AuthService {
   public void requestLogin(RequestOtpDTO dto) {
 
     // 1. Get user by documentData from incoming request
-    User user = userService.getUserByDocument(dto.getDocumentNumber());
+    User user = userService.getUserByDocument(dto.documentNumber());
 
     // 2. Create and send OTP attached to the user
     otpService.requestOtp(user);
@@ -37,8 +37,8 @@ public class AuthService {
       VerifyOtpDTO dto, HttpServletRequest request) { // ip, userAgent, deviceId
 
     // 1. Extract data from the incoming request DTO
-    String documentNumber = dto.getDocumentNumber();
-    String otpRequest = dto.getOtp();
+    String documentNumber = dto.documentNumber();
+    String otpRequest = dto.otp();
 
     // 2. Obtain user
     User user = userService.getUserByDocument(documentNumber);
@@ -57,7 +57,7 @@ public class AuthService {
     String jwtToken = jwtService.generateToken(user.getId(), session.getSessionToken());
 
     // 6. Return access token(JWT) & fingerprint
-    return new AuthResult(jwtToken, refreshToken, fingerprintRaw);
+    return new AuthResult(jwtToken, refreshToken, fingerprintRaw); //en controller Jackson lo convierte en JSON automatico
   }
 
   @Transactional

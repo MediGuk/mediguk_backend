@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper; // Transformar un JSON (o un
 // --- IMPORTS DEL DOMINIO MEDIGUK ---
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.entity.TriageStatus;
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.request.TriageRequest;
 import com.mediguk.backend.triage.model.StageOneResult;
 import com.mediguk.backend.triage.model.specialty.DermatologyDetails;
 import com.mediguk.backend.triage.strategy.TriageStrategy;
@@ -27,7 +27,8 @@ import com.mediguk.backend.triage.exception.MedicalDataIncompleteException;
  */
 @Slf4j
 @Component
-public class DermatologyStrategy implements TriageStrategy {
+public class DermatologyStrategy implements TriageStrategy { //extends BaseTriageStrategy (polimorfismo + herencia) ?????
+    ////////////////////////*********polimorfismo vs herencia *******************///////////////////////////////
 
     @Autowired
     private AIService aiService; // El motor de IA que ejecuta nuestros prompts
@@ -47,7 +48,7 @@ public class DermatologyStrategy implements TriageStrategy {
      * Aquí lanzamos el prompt experto y sellamos la mochila JSONB.
      */
     @Override
-    public void conductStage1(TriageCase entity, TriageRequestFromClient request) {
+    public void conductStage1(TriageCase entity, TriageRequest request) {
         
         // 1. GENERAMOS LA LISTA DE CAMPOS AUTOMÁTICAMENTE
         // Si mañana añades "size" al Record, esto lo pilla solo.

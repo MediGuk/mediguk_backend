@@ -1,7 +1,7 @@
 package com.mediguk.backend.triage.strategy;
 
 import com.mediguk.backend.triage.entity.TriageCase;
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.request.TriageRequest;
 
 public interface TriageStrategy {
 
@@ -12,7 +12,7 @@ public interface TriageStrategy {
      * La Strategy llama a la IA con su PROMPT PROPIO,
      * valida el mismatch y rellena la MOCHILA JSONB.
      */
-    void conductStage1(TriageCase entity, TriageRequestFromClient request);
+    void conductStage1(TriageCase entity, TriageRequest request);
 
     /**
      * STAGE 2: El Científico busca.

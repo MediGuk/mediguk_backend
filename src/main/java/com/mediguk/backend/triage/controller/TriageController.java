@@ -1,6 +1,6 @@
 package com.mediguk.backend.triage.controller;
 
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.request.TriageRequest;
 import com.mediguk.backend.triage.dto.response.DemoStageOneResponse;
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.service.TriageService;
@@ -23,7 +23,7 @@ public class TriageController {
    */
   @PostMapping("/process")
   public ResponseEntity<DemoStageOneResponse> processTriage(
-      @Valid @RequestBody TriageRequestFromClient request) {
+      @Valid @RequestBody TriageRequest request) {
     log.info("--- NUEVO CASO RECIBIDO DESDE GO ---");
     log.info(
         "ID Caso: {} | Paciente: {} | Categoría Sugerida: {}",

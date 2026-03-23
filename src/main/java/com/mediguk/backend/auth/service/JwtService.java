@@ -16,10 +16,13 @@ public class JwtService {
   @Value("${app.security.jwt.secret-key}")
   private String jwtSecret;
 
+  @Value("${mediguk.jwt.expiration}")
+  private long jwtExpiration;
+
   public String generateToken(UUID userId, String sessionToken) {
 
     Date now = new Date();
-    Date expiry = new Date(now.getTime() + 1000 * 60 * 60); // 1h
+    Date expiry = new Date(now.getTime() + jwtExpiration); // + 1h
 
     return Jwts.builder() // return a token
         .subject(userId.toString()) // who is the user
@@ -38,5 +41,9 @@ public class JwtService {
   public Claims parseToken(String token) {
 
     return Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token).getPayload();
+  }
+
+  public long getExpirationTime() {
+    return jwtExpiration;
   }
 }

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mediguk.backend.triage.dto.request.TriageRequestFromClient;
+import com.mediguk.backend.triage.dto.request.TriageRequest;
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.entity.TriageStatus;
 import com.mediguk.backend.triage.exception.CategoryMismatchException;
@@ -34,7 +34,7 @@ public class InfectionStrategy implements TriageStrategy {
     }
 
     @Override
-    public void conductStage1(TriageCase entity, TriageRequestFromClient request) {
+    public void conductStage1(TriageCase entity, TriageRequest request) {
         List<String> commonFields = RecordInspector.getFields(StageOneResult.class);
         List<String> specificFields = RecordInspector.getFields(InfectionDetails.class);
 

@@ -35,8 +35,12 @@ public class AuthController {
   }
 
   @PostMapping("/request-otp")
-  public void requestOtp(@RequestBody RequestOtpDTO dto) {
-    authService.requestLogin(dto);
+  public ResponseEntity<Map<String, String>> requestOtp(@RequestBody RequestOtpDTO dto) {
+    String otp = authService.requestLogin(dto);
+    //For the DEMO
+    // 5. Send HTPP responde
+    return ResponseEntity.ok()
+            .body(Map.of("otp", otp));    
   }
 
   @PostMapping("/verify-otp")

@@ -23,13 +23,16 @@ public class AuthService {
   private final OtpService otpService;
 
   @Transactional // One operaton at the same time in DB (protects against 2 request at same time)
-  public void requestLogin(RequestOtpDTO dto) {
+  public String requestLogin(RequestOtpDTO dto) {
 
     // 1. Get user by documentData from incoming request
     User user = userService.getUserByDocument(dto.documentNumber());
 
     // 2. Create and send OTP attached to the user
-    otpService.requestOtp(user);
+    String otp = otpService.requestOtp(user);
+
+    //Para la DEMO, enviar OTP en la respuesta (future send via email, Whatsapp)
+    return otp;
   }
 
   @Transactional
@@ -54,7 +57,7 @@ public class AuthService {
     String refreshToken = session.getRefreshToken();
 
     // 5. Generate token JWT
-    String jwtToken = jwtService.generateToken(user.getId(), session.getSessionToken());
+    String jwtToken = jwtService.generateToken(user.getId(), session.getSessionToken(), fingerprintRaw);
 
     // 6. Return access token(JWT) & fingerprint
     return new AuthResult(jwtToken, refreshToken, fingerprintRaw); //en controller Jackson lo convierte en JSON automatico
@@ -81,7 +84,7 @@ public class AuthService {
     String newRefreshToken = sessionService.rotateRefreshToken(session);
 
     // 3. Generate new JWT (old one is expired)
-    String newJwt = jwtService.generateToken(session.getUser().getId(), session.getSessionToken());
+    String newJwt = jwtService.generateToken(session.getUser().getId(), session.getSessionToken(), session.getFingerprintHash());
 
     // 4. Return with new Jwt & refreshToken
     return new AuthResult(newJwt, newRefreshToken, fingerprintRaw);

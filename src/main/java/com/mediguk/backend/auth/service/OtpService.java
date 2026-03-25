@@ -20,7 +20,7 @@ public class OtpService {
   private final PasswordEncoder passwordEncoder;
 
   @Transactional
-  public void requestOtp(User user) {
+  public String requestOtp(User user) {
     LocalDateTime now = LocalDateTime.now();
 
     // 1. Cheack last OTP of user to check if 60 secons passed already from last sent
@@ -48,8 +48,6 @@ public class OtpService {
     int otpCode = random.nextInt(9000) + 1000;
     String otpPlain = String.valueOf(otpCode);
 
-    System.out.println("OTP generated: " + otpPlain); // Solo para desarrollo
-
     // Crear entidad y guardar hasheado
     Otp newOtp = new Otp();
     newOtp.setUser(user);
@@ -62,6 +60,7 @@ public class OtpService {
 
     otpRepository.save(newOtp);
 
+    return otpPlain;
     // FUTURE: Send otpPlain via Whatsapp/SMS/email
   }
 

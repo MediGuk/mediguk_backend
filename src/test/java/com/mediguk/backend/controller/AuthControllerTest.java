@@ -9,6 +9,7 @@ import com.mediguk.backend.auth.entity.User;
 import com.mediguk.backend.auth.repository.AuthSessionRepository;
 import com.mediguk.backend.auth.repository.OtpRepository;
 import com.mediguk.backend.auth.repository.UserRepository;
+import com.mediguk.backend.core.utils.HashUtil;
 import com.mediguk.backend.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
       "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
       "spring.jpa.hibernate.ddl-auto=create-drop",
       // valor cualquiera para el test de los .env
-      "JWT_SECRET=estaesunaclavesecretadePruebas12345678901234567890",
       "FRONTEND_URL=http://localhost:3000",
-      "GEMINI_API_KEY=tu-key-api-key"
+      "GEMINI_API_KEY=tu-key-api-key",
+      "JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----MC4CAQAwBQYDK2VwBCIEIPmS9aX1vR2k9kL5jR8mN2q8X7z1L0p8v6n9m3r5t8k1-----END PRIVATE KEY-----",
+      "JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----MCowBQYDK2VwAyEAs6v8n9L0p2k1m3r4v5n6x7z8j9k0l1m2n3o4p5q6r7s=-----END PUBLIC KEY-----"
     })
 @AutoConfigureMockMvc
 @ActiveProfiles("test") // Importante: Lee application-test.properties con H2
@@ -122,7 +124,7 @@ class AuthControllerTest {
 
     AuthSession session =
         TestDataFactory.createSession(
-            user, refreshToken, passwordEncoder.encode(rawFingerprint) // Guardado hasheado
+            user, refreshToken, HashUtil.sha256(rawFingerprint) // Guardado hasheado
             );
     sessionRepository.save(session);
 

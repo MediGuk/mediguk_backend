@@ -4,13 +4,14 @@ import com.mediguk.backend.auth.entity.AuthSession;
 import com.mediguk.backend.auth.entity.User;
 import com.mediguk.backend.auth.model.SessionCreationResult;
 import com.mediguk.backend.auth.repository.AuthSessionRepository;
+import com.mediguk.backend.core.utils.HashUtil;
+
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class SessionService {
 
   private final AuthSessionRepository authSessionRepository;
-  private final PasswordEncoder passwordEncoder;
 
   public SessionCreationResult createSession(User user, HttpServletRequest request) {
 
     // FUNDAMENTAL
     String fingerprintRaw = generateFingerprint();
-    String fingerprintHash = passwordEncoder.encode(fingerprintRaw);
+    String fingerprintHash = HashUtil.sha256(fingerprintRaw); // Utliza SHA256 porque el fgp ya es byte raro
 
     String sessionToken = UUID.randomUUID().toString(); // inside JWT payload/Claims
     String refreshToken = UUID.randomUUID().toString(); // by HTTP endpoint
@@ -45,7 +45,7 @@ public class SessionService {
             .build();
 
     AuthSession savedSession = authSessionRepository.save(session);
-    return new SessionCreationResult(savedSession, fingerprintRaw);
+    return new SessionCreationResult(savedSession, fingerprintRaw, fingerprintHash);
   }
 
   private String generateFingerprint() {
@@ -101,7 +101,8 @@ public class SessionService {
     }
 
     // 3. Validate session by rawFingerprint cookie
-    if (!passwordEncoder.matches(fingerprintRaw, session.getFingerprintHash())) {
+    String receivedFgp = HashUtil.sha256(fingerprintRaw);
+    if (!receivedFgp.equals(session.getFingerprintHash())) {
       session.setRevoked(true); // Kill it if fingerprint doesn't match
       throw new RuntimeException("Seguridad: Huella no válida");
     }

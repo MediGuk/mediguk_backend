@@ -2,6 +2,8 @@ package com.mediguk.backend.core.security;
 
 import com.mediguk.backend.auth.repository.AuthSessionRepository;
 import com.mediguk.backend.auth.service.JwtService;
+import com.mediguk.backend.core.utils.HashUtil;
+
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +22,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final AuthSessionRepository authSessionRepository;
-  private final PasswordEncoder passwordEncoder;
 
   // constructor
   public JwtAuthenticationFilter(
@@ -29,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       PasswordEncoder passwordEncoder) {
     this.jwtService = jwtService;
     this.authSessionRepository = authSessionRepository;
-    this.passwordEncoder = passwordEncoder;
   }
 
   @Override
@@ -83,7 +83,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // 4. Validate the fingerprint cookie with the server hash one
-    boolean validFingerprint = passwordEncoder.matches(fingerprint, session.getFingerprintHash());
+    String arrivedFgp = HashUtil.sha256(fingerprint);
+    boolean validFingerprint = arrivedFgp.equals(session.getFingerprintHash());
 
     if (!validFingerprint) {
       filterChain.doFilter(request, response);

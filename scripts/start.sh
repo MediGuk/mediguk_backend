@@ -1,3 +1,5 @@
 #!/bin/bash
-export $(grep -v '^#' .env | xargs) #para cargar las variables de .env
+set -a
+source .env
+set +a
 ./mvnw spring-boot:run

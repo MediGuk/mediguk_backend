@@ -49,7 +49,7 @@ public class DermatologyStrategy implements TriageStrategy { //extends BaseTriag
      */
     @Override
     public void conductStage1(TriageCase entity, TriageRequest request) {
-        
+
         // 1. GENERAMOS LA LISTA DE CAMPOS AUTOMÁTICAMENTE
         // Si mañana añades "size" al Record, esto lo pilla solo.
         List<String> commonFields = RecordInspector.getFields(StageOneResult.class);
@@ -61,7 +61,7 @@ public class DermatologyStrategy implements TriageStrategy { //extends BaseTriag
             "Devuelve un JSON con estos campos obligatorios: %s " +
             "Y dentro del objeto 'specialtyDetails', estos campos específicos: %s" +
             "IMPORTANTE: Para los campos booleanos  usa exclusivamente los valores JSON true o false. No añadas texto descriptivo.",
-            request.rawInput(), commonFields, dermaFields
+            request.resumeClinic(), commonFields, dermaFields
         );
 
         // 2. LLAMADA A LA IA (VLM)
@@ -81,7 +81,7 @@ public class DermatologyStrategy implements TriageStrategy { //extends BaseTriag
         try {
             // Sacamos el mapa 'details' y lo convertimos al Record de un golpe
             DermatologyDetails details = mapper.convertValue(
-                aiResult.specialtyDetails(), 
+                aiResult.specialtyDetails(),
                 DermatologyDetails.class
             );
 
@@ -90,7 +90,7 @@ public class DermatologyStrategy implements TriageStrategy { //extends BaseTriag
             // entity.setCleanedPatientInput(aiResult.cleanedPatientInput());
             // 7. INSERT en details JSONB de entity
             entity.getMedicalData().put("specialtyDetails", details); // ¡A LA MOCHILA!
-            
+
             // Estado actualizado
             entity.setStatus(TriageStatus.ST1_SPECIALIST_ACCEPTED);
 

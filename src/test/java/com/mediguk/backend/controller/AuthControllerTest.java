@@ -34,7 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
       "FRONTEND_URL=http://localhost:3000",
       "GEMINI_API_KEY=tu-key-api-key",
       "JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----MC4CAQAwBQYDK2VwBCIEIPmS9aX1vR2k9kL5jR8mN2q8X7z1L0p8v6n9m3r5t8k1-----END PRIVATE KEY-----",
-      "JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----MCowBQYDK2VwAyEAs6v8n9L0p2k1m3r4v5n6x7z8j9k0l1m2n3o4p5q6r7s=-----END PUBLIC KEY-----"
+      "JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----MCowBQYDK2VwAyEAs6v8n9L0p2k1m3r4v5n6x7z8j9k0l1m2n3o4p5q6r7s=-----END PUBLIC KEY-----",
+      "AUTH_COOKIE_SECURE=false",
+      "AUTH_COOKIE_SAMESITE=Lax",
+      "REDIS_HOST=localhost",
+      "REDIS_PORT=6379"
     })
 @AutoConfigureMockMvc
 @ActiveProfiles("test") // Importante: Lee application-test.properties con H2

@@ -39,7 +39,7 @@ public class ValidationExceptionHandler {
   // Para errores genéricos del servidor (500)
   // Es mejor no devolver el mensaje real de la excepción en producción por seguridad
   @ExceptionHandler(RuntimeException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public Map<String, String> handleRuntimeException(RuntimeException ex) {
     Map<String, String> error = new HashMap<>();

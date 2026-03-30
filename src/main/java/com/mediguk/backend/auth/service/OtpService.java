@@ -23,18 +23,18 @@ public class OtpService {
   public String requestOtp(User user) {
     LocalDateTime now = LocalDateTime.now();
 
-    // 1. Cheack last OTP of user to check if 60 secons passed already from last sent
-    Optional<Otp> lastOtpEntity =
-        otpRepository.findTopByUserOrderByExpiresAtDesc(user); // can be null
+    // 1. Cheack last OTP of user to check if 60 secons passed already from last
+    // sent
+    Optional<Otp> lastOtpEntity = otpRepository.findTopByUserOrderByExpiresAtDesc(user); // can be null
 
     lastOtpEntity.ifPresent(
         lastOtp -> {
-          // If OTP not used & not expired: Has to pass 60 seconds from last sent OTP (avoid spam)
+          // If OTP not used & not expired: Has to pass 60 seconds from last sent OTP
+          // (avoid spam)
           if (!lastOtp.isUsed()
               && lastOtp.getExpiresAt().isAfter(now)
               && lastOtp.getLastSentAt().plusSeconds(60).isAfter(now)) {
-            long timeLeft =
-                Duration.between(now, lastOtp.getLastSentAt().plusSeconds(60)).toSeconds();
+            long timeLeft = Duration.between(now, lastOtp.getLastSentAt().plusSeconds(60)).toSeconds();
             throw new RuntimeException(
                 "Please wait " + timeLeft + "s before requesting another OTP");
           }
@@ -60,6 +60,11 @@ public class OtpService {
 
     otpRepository.save(newOtp);
 
+    System.out.println("🆕 [OTP_SERVICE] Nuevo OTP generado para el usuario [" + user.getId() + "]:");
+    System.out.println("   - Creado en: " + newOtp.getCreatedAt());
+    System.out.println("   - Expira en: " + newOtp.getExpiresAt());
+    System.out.println("   - Estado (used): " + newOtp.isUsed());
+
     return otpPlain;
     // FUTURE: Send otpPlain via Whatsapp/SMS/email
   }
@@ -69,11 +74,26 @@ public class OtpService {
 
     LocalDateTime now = LocalDateTime.now();
 
+    System.out.println("🔍 [OTP_SERVICE] Validando OTP para usuario [" + user.getId() + "]...");
+    System.out.println("   - Hora actual (System now): " + now);
+
+    // Diagnóstico extra: Ver si existe algún OTP (aunque esté expirado o usado)
+    Optional<Otp> latest = otpRepository.findTopByUserOrderByExpiresAtDesc(user);
+    if (latest.isPresent()) {
+      Otp o = latest.get();
+      System.out.println("   - OTP más reciente en DB:");
+      System.out.println("     * ID: " + o.getId());
+      System.out.println("     * Expira en: " + o.getExpiresAt());
+      System.out.println("     * Usado: " + o.isUsed());
+      System.out.println("     * ¿Expirado respecto a 'now'?: " + o.getExpiresAt().isBefore(now));
+    } else {
+      System.out.println("   - [!] No se ha encontrado NINGÚN OTP para este usuario en la base de datos.");
+    }
+
     // 1. Find the last NO expired/used OTP
-    Otp lastOtpEntity =
-        otpRepository
-            .findActiveOtp(user, now)
-            .orElseThrow(() -> new RuntimeException("OTP not found or expired"));
+    Otp lastOtpEntity = otpRepository
+        .findActiveOtp(user, now)
+        .orElseThrow(() -> new RuntimeException("OTP not found or expired"));
 
     // 2. Control of total attemps from all the OTPs in total made by the user
     Integer recentAttempts = otpRepository.countRecentAttempts(user, now.minusMinutes(10));

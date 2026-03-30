@@ -5,7 +5,7 @@ Service backend de la plataforma Mediguk desarrollado con Spring Boot.
 ## Entorno
 
 Versiones requeridas:
-- Java 21 (verificar con `java -version` y `javac -version`)
+- JDK Java 21 (verificar con `java -version` y `javac -version`)
 - SpringBoot 4.0.3
    migration help: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide#starters
 - PostgreSQL
@@ -46,3 +46,7 @@ Versiones requeridas:
 * **API Reference (Swagger):** Documentación interactiva de endpoints disponible en `http://localhost:8080/swagger-ui.html` (generada automáticamente con SpringDoc OpenApi). Con anotaciones para saber que hace el endpoint.
 
 > **Tip:** Si usas VS Code, instala la extensión "Markdown Preview Mermaid Support" para previsualizar los diagramas directamente.
+
+## Filtros de Calidad
+
+* **[Sonar](...) Filtro en desarrollo y despliegue.

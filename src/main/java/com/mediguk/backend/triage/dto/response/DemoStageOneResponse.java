@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public record DemoStageOneResponse (
     UUID id,
-    String patientId,
     String category,
     TriageStatus status,
     //FiltrespsaitientInput

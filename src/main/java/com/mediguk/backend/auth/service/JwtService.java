@@ -40,56 +40,58 @@ public class JwtService {
         .compact();
   }
 
-  // returns payload/claims of JWT: userID, claim (sessionToken), issuedAt, expiration
+  // returns payload/claims of JWT: userID, claim (sessionToken), issuedAt,
+  // expiration
   public Claims parseToken(String token) {
     return Jwts.parser()
-               .verifyWith(getPublicKey())
-               .build()
-               .parseSignedClaims(token)
-               .getPayload();
+        .verifyWith(getPublicKey())
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
   }
+
   public long getExpirationTime() {
     return jwtExpiration;
   }
 
-  // 🚨 Traductor Ultrarrápido Ed25519 (Curvas Elípticas) 🚨
-  private PrivateKey getPrivateKey() {
-    try {
-        // Limpiamos la basura del .env como siempre
-        String privateKeyPEM = jwtPrivateKey
-            .replace("-----BEGIN PRIVATE KEY-----", "")
-            .replace("-----END PRIVATE KEY-----", "")
-            .replace("\\n", "") // Quitamos tus \n literales
-            .replaceAll("\\s", "");
-        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
-        
-        // 🔮 AQUÍ ESTÁ LA NUEVA MAGIA MAGIA 🔮
-        KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
-        
-        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encoded));
-    } catch (Exception e) {
-        throw new RuntimeException("Error fatal leyendo la Llave Privada Ed25519", e);
+    private PrivateKey getPrivateKey() {
+        try {
+            String step1 = jwtPrivateKey.replace("\\n", "\n");
+            String step2 = step1.replace("-----BEGIN PRIVATE KEY-----", "");
+            String step3 = step2.replace("-----END PRIVATE KEY-----", "");
+            String step4 = step3.replaceAll("\\s", "").trim();
+
+            int padding = step4.length() % 4;
+            if (padding > 0) step4 += "=".repeat(4 - padding);
+
+            byte[] encoded = Base64.getDecoder().decode(step4);
+            KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
+            return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+        } catch (Exception e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            throw new RuntimeException("Error leyendo clave privada", e);
+        }
     }
-  }
-  
-    // 🚨 El traductor de texto a Llave PÚBLICA Ed25519 🚨
+
+  // 🚨 El traductor de texto a Llave PÚBLICA Ed25519 🚨
   private PublicKey getPublicKey() {
-    try {
-        // Limpiamos la basura del .env
-        String publicKeyPEM = jwtPublicKey
-            .replace("-----BEGIN PUBLIC KEY-----", "")
-            .replace("-----END PUBLIC KEY-----", "")
-            .replace("\\n", "") // Por si le has puesto saltos de línea literales
-            .replaceAll("\\s", "");
-        byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
-        
-        // El motor de Curva Elíptica
-        KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
-        
-        // Fíjate: Las Públicas siempre usan X509
-        return keyFactory.generatePublic(new X509EncodedKeySpec(encoded));
-    } catch (Exception e) {
-        throw new RuntimeException("Error fatal leyendo la Llave Pública Ed25519", e);
-    }
+      try {
+              String step1 = jwtPublicKey.replace("\\n", "\n")  ;        // PRIMERO convierte \n literal a salto real
+              String step2 = step1.replace("-----BEGIN PUBLIC KEY-----", "");
+              String step3 = step2.replace("-----END PUBLIC KEY-----", "");
+              String step4 = step3.replaceAll("\\s", "").trim();         // elimina todos los espacios/saltos reales
+
+          int padding = step4.length() % 4;
+          if (padding > 0) {
+              step4 += "=".repeat(4 - padding);
+          }
+
+          byte[] encoded = Base64.getDecoder().decode(step4);
+          KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
+          return keyFactory.generatePublic(new X509EncodedKeySpec(encoded));
+      } catch (Exception e) {
+          System.err.println("❌ Error fatal leyendo la Llave Pública Ed25519: " + e.getMessage());
+          throw new RuntimeException("Error fatal leyendo clave pública", e);
+      }
   }
 }

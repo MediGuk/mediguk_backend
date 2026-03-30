@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service // Spring automatically: new AuthService(userRepositoryBean, otpRepositoryBean)  //
+@Service // Spring automatically: new AuthService(userRepositoryBean, otpRepositoryBean)
+         // //
 @RequiredArgsConstructor // Dependency injection automatically. NO NEED of manualconstructor args
 // with this.
 public class AuthService {
@@ -31,7 +32,7 @@ public class AuthService {
     // 2. Create and send OTP attached to the user
     String otp = otpService.requestOtp(user);
 
-    //Para la DEMO, enviar OTP en la respuesta (future send via email, Whatsapp)
+    // Para la DEMO, enviar OTP en la respuesta (future send via email, Whatsapp)
     return otp;
   }
 
@@ -56,11 +57,13 @@ public class AuthService {
     String fingerprintRaw = sessionResult.fingerprint();
     String refreshToken = session.getRefreshToken();
 
-    // 5. Generate token JWT
-    String jwtToken = jwtService.generateToken(user.getId(), session.getSessionToken(), fingerprintRaw);
+    // 5. Generate token JWT (using the HASH of the fingerprint, NOT the raw value)
+    String jwtToken = jwtService.generateToken(user.getId(), session.getSessionToken(),
+        sessionResult.fingerprintHash());
 
     // 6. Return access token(JWT) & fingerprint
-    return new AuthResult(jwtToken, refreshToken, fingerprintRaw); //en controller Jackson lo convierte en JSON automatico
+    return new AuthResult(jwtToken, refreshToken, fingerprintRaw); // en controller Jackson lo convierte en JSON
+                                                                   // automatico
   }
 
   @Transactional
@@ -77,14 +80,16 @@ public class AuthService {
   @Transactional
   public AuthResult refresh(String actualRefreshToken, String fingerprintRaw) {
 
-    // 1. Give a session which is validated by refreshToken, expired/revoked FALSE, fingerprint
+    // 1. Give a session which is validated by refreshToken, expired/revoked FALSE,
+    // fingerprint
     AuthSession session = sessionService.getValidSession(actualRefreshToken, fingerprintRaw);
 
     // 2. Rotate Refresh Token
     String newRefreshToken = sessionService.rotateRefreshToken(session);
 
     // 3. Generate new JWT (old one is expired)
-    String newJwt = jwtService.generateToken(session.getUser().getId(), session.getSessionToken(), session.getFingerprintHash());
+    String newJwt = jwtService.generateToken(session.getUser().getId(), session.getSessionToken(),
+        session.getFingerprintHash());
 
     // 4. Return with new Jwt & refreshToken
     return new AuthResult(newJwt, newRefreshToken, fingerprintRaw);

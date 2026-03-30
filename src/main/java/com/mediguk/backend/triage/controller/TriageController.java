@@ -28,7 +28,6 @@ public class TriageController {
     log.info(
         "ID Caso: {} | Paciente: {} | Categoría Sugerida: {}",
         request.id(),
-        request.patientId(),
         request.suggestedCategory());
 
     // Disparamos el motor de Triage (Stage 1: IA Especialista)
@@ -38,7 +37,6 @@ public class TriageController {
     DemoStageOneResponse response =
         new DemoStageOneResponse(
             entityProcesada.getId(),
-            entityProcesada.getPatientId(),
             entityProcesada.getCategory(),
             entityProcesada.getStatus(),
             entityProcesada.getMedicalData() // Aquí va tu DermatologyDetails dentro del Map

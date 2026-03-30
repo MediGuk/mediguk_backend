@@ -38,7 +38,7 @@ public class GeneralStrategy implements TriageStrategy {
                 + "Devuelve un JSON con estos campos obligatorios: %s "
                 + "Y dentro del objeto 'specialtyDetails', estos campos específicos: %s"
                 + "IMPORTANTE: Para los campos booleanos  usa exclusivamente los valores JSON true o false. No añadas texto descriptivo.",
-            request.rawInput(), commonFields, specificFields);
+            request.resumeClinic(), commonFields, specificFields);
 
     StageOneResult aiResult = aiService.callVLM(request.imageUrl(), prompt);
 

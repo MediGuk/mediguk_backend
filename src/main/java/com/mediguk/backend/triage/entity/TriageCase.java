@@ -59,15 +59,14 @@ public class TriageCase { //abstract no ?? but why abstract ??? exlica lentament
   protected void onCreate() { this.createdAt = LocalDateTime.now();}
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  public TriageCase(UUID id, String patientId, String rawPatientInput, TriageStatus status) {
+
+  public TriageCase(UUID id, String rawPatientInput, TriageStatus status) {
     this.id = id;
-    this.patientId = patientId;
     this.rawPatientInput = rawPatientInput;
     this.status = status;
     this.medicalData = new HashMap<>(); // La mochila nace vacía pero lista  (para qeu no sea null)
   }
-  
+
 }
 
 // {

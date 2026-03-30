@@ -126,9 +126,7 @@ public class TriageService {
     // 2. Si no existe, creamos el nuevo caso
     TriageCase entity =
         existingCase.orElseGet(
-            () ->
-                new TriageCase(
-                    request.id(), request.patientId(), request.rawInput(), TriageStatus.CREATED));
+            () -> new TriageCase(request.id(), request.resumeClinic(), TriageStatus.CREATED));
 
     // 2. RELLENO ADMINISTRATIVO
     if (request.imageUrl() != null) {

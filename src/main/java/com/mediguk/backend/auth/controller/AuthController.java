@@ -7,6 +7,7 @@ import com.mediguk.backend.auth.dto.response.AuthResponse;
 import com.mediguk.backend.auth.model.AuthResult;
 import com.mediguk.backend.auth.service.AuthService;
 import com.mediguk.backend.auth.service.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,19 +29,25 @@ public class AuthController {
   @Autowired
   private JwtService jwtService;
 
+  @Value("${app.security.cookie.secure:true}")
+  private boolean cookieSecure;
+
+  @Value("${app.security.cookie.samesite:Strict}")
+  private String cookieSameSite;
+
   private final AuthService authService;
 
-  public AuthController(AuthService authService, Long jwtExpiration) {
+  public AuthController(AuthService authService) {
     this.authService = authService;
   }
 
   @PostMapping("/request-otp")
   public ResponseEntity<Map<String, String>> requestOtp(@RequestBody RequestOtpDTO dto) {
     String otp = authService.requestLogin(dto);
-    //For the DEMO
+    // For the DEMO
     // 5. Send HTPP responde
     return ResponseEntity.ok()
-            .body(Map.of("otp", otp));    
+        .body(Map.of("otp", otp));
   }
 
   @PostMapping("/verify-otp")
@@ -56,30 +63,32 @@ public class AuthController {
     String refreshToken = result.refreshToken();
 
     // 3. Create cookie of fingerprint
-    ResponseCookie cookie =
-        ResponseCookie.from("fingerprint", fingerprint)
-            .httpOnly(true) // JS devtools cannot read cookies (XSS protection)
-            .secure(true) // only on HTTPS
-            .path("/") // cookie send to all the API
-            .maxAge(60 * 60 * 24 * 30) // 30 days of duration
-            .sameSite("Strict") // (CSRF protection)
-            .build();
+    ResponseCookie cookie = ResponseCookie.from("fingerprint", fingerprint)
+        .httpOnly(true) // JS devtools cannot read cookies (XSS protection)
+        .secure(cookieSecure) // only on HTTPS/local-env-prop
+        .path("/") // Send cookie to all the API
+        .maxAge(60 * 60 * 24 * 30) // 30 days of duration
+        .sameSite(cookieSameSite) // CSRF protection
+        .build();
 
     // 4. Create cookie of refreshToken
-    ResponseCookie refreshCookie =
-        ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true)
-            .secure(true)
-            .path("/") // Ojo: ponlo en "/" para que llegue al endpoint de refresh
-            .maxAge(60 * 60 * 24 * 30)
-            .sameSite("Strict")
-            .build();
+    ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+        .httpOnly(true)
+        .secure(cookieSecure)
+        .path("/")
+        .maxAge(60 * 60 * 24 * 30)
+        .sameSite(cookieSameSite)
+        .build();
 
-    // 5. Send HTPP responde
+    // 5. Create headers and ADD all cookies (to dont overwrite)
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
+    headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+    // 6. Send HTPP responde
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString()) // navegator saves cookie automatically
-        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-        .body(new AuthResponse (result.jwtToken(), jwtService.getExpirationTime()));
+        .headers(headers)
+        .body(new AuthResponse(result.jwtToken(), jwtService.getExpirationTime()));
   }
 
   @PostMapping("/logout")
@@ -89,13 +98,13 @@ public class AuthController {
     authService.logout(token);
 
     // Borramos la cookie de la cara del cliente
-    ResponseCookie deleteCookie =
-        ResponseCookie.from("fingerprint", "")
-            .maxAge(0) // Expired 0s ago, DELETE IT
-            .path("/")
-            .httpOnly(true)
-            .secure(true)
-            .build();
+    ResponseCookie deleteCookie = ResponseCookie.from("fingerprint", "")
+        .maxAge(0) // Expired 0s ago, DELETE IT
+        .path("/")
+        .httpOnly(true)
+        .secure(cookieSecure)
+        .sameSite(cookieSameSite)
+        .build();
 
     return ResponseEntity.ok()
         .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
@@ -110,14 +119,13 @@ public class AuthController {
     AuthResult result = authService.refresh(oldRefreshToken, fingerprintRaw);
 
     // 2. Create response cookie
-    ResponseCookie newRefreshCookie =
-        ResponseCookie.from("refreshToken", result.refreshToken())
-            .httpOnly(true)
-            .secure(true)
-            .path("/auth/refresh")
-            .maxAge(60 * 60 * 24 * 30)
-            .sameSite("Strict")
-            .build();
+    ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", result.refreshToken())
+        .httpOnly(true)
+        .secure(cookieSecure)
+        .path("/auth/refresh")
+        .maxAge(60 * 60 * 24 * 30)
+        .sameSite(cookieSameSite)
+        .build();
 
     // 3. Respond
     return ResponseEntity.ok()

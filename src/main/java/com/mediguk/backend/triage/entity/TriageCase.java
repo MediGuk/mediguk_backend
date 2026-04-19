@@ -28,11 +28,9 @@ public class TriageCase { //abstract no ?? but why abstract ??? exlica lentament
   private UUID id; // lo crea Go y asi tenemos trazabilidad
 
   @Column(name = "patient_id", nullable = false)
-  private String patientId;
+  private UUID patientId;
 
   // --- DATOS DE ENTRADA (STAGE 0) ----------------------------------------------------------------
-  @Column(columnDefinition = "TEXT")
-  private String rawPatientInput; //mensaje inicial + preguntas
   private String optimizedImageUrl;
   private String category; //Go te lo manda preguntado a client + mini vlm/llm Y stage1 si da error lo va y cambia
 
@@ -55,14 +53,17 @@ public class TriageCase { //abstract no ?? but why abstract ??? exlica lentament
 
   private LocalDateTime createdAt;
 
+  @JdbcTypeCode(SqlTypes.JSON) // Hibernate JSONB
+  @Column(name = "full_transcript", columnDefinition = "jsonb")
+  private List<Map<String, String>> fullTranscript;
+
   @PrePersist
   protected void onCreate() { this.createdAt = LocalDateTime.now();}
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public TriageCase(UUID id, String rawPatientInput, TriageStatus status) {
+  public TriageCase(UUID id, TriageStatus status) {
     this.id = id;
-    this.rawPatientInput = rawPatientInput;
     this.status = status;
     this.medicalData = new HashMap<>(); // La mochila nace vacía pero lista  (para qeu no sea null)
   }

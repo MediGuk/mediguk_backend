@@ -93,7 +93,11 @@ import com.mediguk.backend.triage.exception.UUIDCollisionException;
 import com.mediguk.backend.triage.factory.TriageStrategyFactory;
 import com.mediguk.backend.triage.repository.TriageRepository;
 import com.mediguk.backend.triage.strategy.TriageStrategy;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -125,8 +129,21 @@ public class TriageService {
 
     // 2. Si no existe, creamos el nuevo caso
     TriageCase entity =
-        existingCase.orElseGet(
-            () -> new TriageCase(request.id(), request.resumeClinic(), TriageStatus.CREATED));
+        existingCase.orElseGet(() -> new TriageCase(request.id(), TriageStatus.CREATED));
+
+    // Guardar el resumen estructurado de Go/AI
+    entity.setCleanedPatientInput(request.resumeClinic());
+
+    // Guardar el Transcript Literal (Sin tocar por IA)
+    if (request.fullTranscript() != null) {
+      entity.setFullTranscript(
+          request.fullTranscript().stream()
+              .map(t -> Map.of("question", t.question(), "answer", t.answer()))
+              .collect(Collectors.toList()));
+    }
+
+    // Guardar el vínculo con el paciente (¡UUID Nativo!)
+    entity.setPatientId(request.patientId());
 
     // 2. RELLENO ADMINISTRATIVO
     if (request.imageUrl() != null) {
@@ -160,12 +177,16 @@ public class TriageService {
     entity.setStatus(TriageStatus.ST1_SPECIALIST_ACCEPTED);
     // RETURN para la demo
     return repository.saveAndFlush(entity); // Aseguras que el Stage 1 se cierra y se escribe ya.
-
-    // FACADE se utilzias para hacer como metodos helper para el service y asi no tenemos 2000
-    // lineas de codigo
-    // StageTwoResult evidence = stageTwoFacade.getFullScientificEvidence(entity);
-    // executeStage3Verdict(entity, evidence);
   }
+
+  public List<TriageCase> getPatientHistory(UUID patientId) {
+    return repository.findTop10ByPatientIdOrderByCreatedAtDesc(patientId);
+  }
+
+  // FACADE se utilzias para hacer como metodos helper para el service y asi no tenemos 2000
+  // lineas de codigo
+  // StageTwoResult evidence = stageTwoFacade.getFullScientificEvidence(entity);
+  // executeStage3Verdict(entity, evidence);
 
   private void executeStage1WithStrategy(
       TriageCase entity, TriageRequest request, String category) {

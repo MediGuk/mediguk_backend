@@ -54,6 +54,7 @@ public class TriageQueueListener implements CommandLineRunner {
                                 entityProcesada.getId(),
                                 entityProcesada.getCategory(),
                                 entityProcesada.getStatus(),
+                                entityProcesada.getFullTranscript(),
                                 entityProcesada.getMedicalData() // Aquí va tu DermatologyDetails dentro del Map
                                 );
 

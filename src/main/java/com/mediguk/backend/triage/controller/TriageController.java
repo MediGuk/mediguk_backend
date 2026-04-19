@@ -5,9 +5,13 @@ import com.mediguk.backend.triage.dto.response.DemoStageOneResponse;
 import com.mediguk.backend.triage.entity.TriageCase;
 import com.mediguk.backend.triage.service.TriageService;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -17,6 +21,28 @@ import org.springframework.web.bind.annotation.*;
 public class TriageController {
 
   private final TriageService triageService;
+
+  @GetMapping("/history")
+  public ResponseEntity<List<DemoStageOneResponse>> getTriageHistory(
+      @AuthenticationPrincipal String patientId) {
+    log.info("📡 [JAVA GATEWAY] Consultando historial para el paciente autenticado: {}", patientId);
+
+    UUID patientUuid = UUID.fromString(patientId);
+    List<TriageCase> history = triageService.getPatientHistory(patientUuid);
+    List<DemoStageOneResponse> response =
+        history.stream()
+            .map(
+                entity ->
+                    new DemoStageOneResponse(
+                        entity.getId(),
+                        entity.getCategory(),
+                        entity.getStatus(),
+                        entity.getFullTranscript(),
+                        entity.getMedicalData()))
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(response);
+  }
 
   /**
    * EL PUNTO DE ENTRADA (STAGE 1): Aquí es donde Go nos manda el ID, el PatientId y el RawInput.
@@ -39,6 +65,7 @@ public class TriageController {
             entityProcesada.getId(),
             entityProcesada.getCategory(),
             entityProcesada.getStatus(),
+            entityProcesada.getFullTranscript(),
             entityProcesada.getMedicalData() // Aquí va tu DermatologyDetails dentro del Map
             );
 

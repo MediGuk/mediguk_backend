@@ -31,7 +31,9 @@ public class TriageCase { //abstract no ?? but why abstract ??? exlica lentament
   private UUID patientId;
 
   // --- DATOS DE ENTRADA (STAGE 0) ----------------------------------------------------------------
+  @Column(columnDefinition = "TEXT")
   private String optimizedImageUrl;
+  @Column(columnDefinition = "TEXT")
   private String category; //Go te lo manda preguntado a client + mini vlm/llm Y stage1 si da error lo va y cambia
 
   // --- DESCRIPCIÓN MÉDICA (STAGE 1) --------------------------------------------------------------
@@ -39,6 +41,7 @@ public class TriageCase { //abstract no ?? but why abstract ??? exlica lentament
   // @CollectionTable(name = "case_history_points", joinColumns = @JoinColumn(name = "case_id"))
   // @Column(name = "point", columnDefinition = "TEXT")
   private List<String> cleanedMedicalHistory;
+  @Column(columnDefinition = "TEXT")
   private String cleanedPatientInput; // ordena y lo limpia todo el raw input que le manda el paciente
 
   // --- MOCHILA MEDICA (CORAZON) (Composicion flexible en vez de strict herencia) RECORDS Y STRATEGIES

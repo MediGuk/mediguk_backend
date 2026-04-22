@@ -47,6 +47,16 @@ Versiones requeridas:
 
 > **Tip:** Si usas VS Code, instala la extensión "Markdown Preview Mermaid Support" para previsualizar los diagramas directamente.
 
-## Filtros de Calidad
+## 🧪 Testing y Calidad
 
-* **[Sonar](...) Filtro en desarrollo y despliegue.
+Stack de validación para asegurar un código robusto y mantenible:
+
+* **JUnit 5 & Mockito:** Framework base para pruebas unitarias y simulación de dependencias.
+* **H2 Database:** Base de datos en memoria para tests de integración rápidos sin depender de PostgreSQL.
+* **JaCoCo:** Agente que mide el **Coverage** (qué porcentaje de líneas de código "pisan" los tests).
+* **SonarQube & SonarLint:** Análisis estático de bugs, vulnerabilidades y cumplimiento del **Quality Gate (mínimo 50% coverage)**.
+
+### Ejecutar análisis completo
+Para correr los tests y enviar el reporte de cobertura al panel de Sonar:
+```bash
+./mvnw clean verify sonar:sonar -Dsonar.token=TU_TOKEN_AQUÍ

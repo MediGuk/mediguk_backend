@@ -1,6 +1,5 @@
 package com.mediguk.backend.triage.strategy.impl;
 
-// --- IMPORTS DE SPRING & JAVA ---
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;

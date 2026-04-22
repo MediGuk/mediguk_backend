@@ -1,8 +1,10 @@
 package com.mediguk.backend.core.security;
 
 import com.mediguk.backend.auth.repository.AuthSessionRepository;
-import com.mediguk.backend.auth.service.JwtService;
+
 import java.util.List;
+
+import com.mediguk.backend.auth.service.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,10 +67,10 @@ public class SecurityConfig {
                 "/swagger-ui.html"
                 ).permitAll();
             }
-            
+
             auth.requestMatchers("/auth/**").permitAll();
             // .requestMatchers("/api/triage/**").permitAll() // Para probar DEMO POSTMAN
-            
+
             auth.anyRequest().authenticated();
         })
 

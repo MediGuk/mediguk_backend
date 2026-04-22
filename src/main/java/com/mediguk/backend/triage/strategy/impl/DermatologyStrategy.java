@@ -1,4 +1,4 @@
-package com.mediguk.backend.triage.strategy.implementation;
+package com.mediguk.backend.triage.strategy.impl;
 
 // --- IMPORTS DE SPRING & JAVA ---
 import org.springframework.stereotype.Component;

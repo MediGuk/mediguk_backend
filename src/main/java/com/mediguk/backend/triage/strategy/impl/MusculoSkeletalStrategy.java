@@ -1,4 +1,4 @@
-package com.mediguk.backend.triage.strategy.implementation;
+package com.mediguk.backend.triage.strategy.impl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;

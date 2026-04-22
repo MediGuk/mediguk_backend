@@ -13,9 +13,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.time.Duration;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Autenticación", description = "Endpoints para el manejo de OTP y sesiones")
 public class AuthController {
 
-  @Autowired
-  private JwtService jwtService;
+//  @Autowired intenta eveitar que luego sufre los tests
 
   @Value("${app.security.cookie.secure:true}")
   private boolean cookieSecure;
@@ -35,17 +35,17 @@ public class AuthController {
   @Value("${app.security.cookie.samesite:Strict}")
   private String cookieSameSite;
 
+  private final JwtService jwtService;
   private final AuthService authService;
 
-  public AuthController(AuthService authService) {
-    this.authService = authService;
+  public AuthController(JwtService jwtService, AuthService authService) {
+      this.jwtService = jwtService;
+      this.authService = authService;
   }
 
   @PostMapping("/request-otp")
   public ResponseEntity<Map<String, String>> requestOtp(@RequestBody RequestOtpDTO dto) {
     String otp = authService.requestLogin(dto);
-    // For the DEMO
-    // 5. Send HTPP responde
     return ResponseEntity.ok()
         .body(Map.of("otp", otp));
   }
@@ -67,7 +67,7 @@ public class AuthController {
         .httpOnly(true) // JS devtools cannot read cookies (XSS protection)
         .secure(cookieSecure) // only on HTTPS/local-env-prop
         .path("/") // Send cookie to all the API
-        .maxAge(60 * 60 * 24 * 30) // 30 days of duration
+        .maxAge(Duration.ofDays(30)) // 30 days of duration
         .sameSite(cookieSameSite) // CSRF protection
         .build();
 
@@ -76,7 +76,7 @@ public class AuthController {
         .httpOnly(true)
         .secure(cookieSecure)
         .path("/")
-        .maxAge(60 * 60 * 24 * 30)
+        .maxAge(Duration.ofDays(30))
         .sameSite(cookieSameSite)
         .build();
 
@@ -123,7 +123,7 @@ public class AuthController {
         .httpOnly(true)
         .secure(cookieSecure)
         .path("/auth/refresh")
-        .maxAge(60 * 60 * 24 * 30)
+        .maxAge(Duration.ofDays(30))
         .sameSite(cookieSameSite)
         .build();
 

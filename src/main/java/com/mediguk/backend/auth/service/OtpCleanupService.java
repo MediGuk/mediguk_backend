@@ -16,7 +16,7 @@ public class OtpCleanupService {
   }
 
   @Transactional
-  @Scheduled(cron = "0 0 * * * *")
+  @Scheduled(cron = "0 0 * * * *") // SCHEDULED CRON
   public void cleanExpiredOtps() {
     System.out.println("Cleaning expired OTPs...");
     otpRepository.deleteExpiredOtps(LocalDateTime.now());

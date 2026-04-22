@@ -6,15 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.UUID;
-import lombok.AllArgsConstructor; // Generate instancies manually
-import lombok.Data; // Generates getters, setters, constructor and equals/hashCode automatically
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Data // get*, set*, constructor, equals() y hashCode()
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 
   @Id @GeneratedValue private UUID id;

@@ -1,4 +1,4 @@
-package com.mediguk.backend.triage.strategy.implementation;
+package com.mediguk.backend.triage.strategy.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mediguk.backend.triage.dto.request.TriageRequest;

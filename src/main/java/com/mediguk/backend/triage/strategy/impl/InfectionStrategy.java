@@ -1,4 +1,4 @@
-package com.mediguk.backend.triage.strategy.implementation;
+package com.mediguk.backend.triage.strategy.impl;
 
 import java.util.List;
 
